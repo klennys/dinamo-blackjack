@@ -1117,12 +1117,12 @@ async def api_register(request):
         # Retrieve user row
         cur.execute("SELECT * FROM users WHERE id = ?", (user_id,))
         row = dict(cur.fetchone())
-        conn.close()
         del row["password_hash"]
 
         token = secrets.token_hex(24)
         cur.execute("INSERT OR REPLACE INTO sessions (token, user_id, created_at) VALUES (?, ?, ?)", (token, user_id, time.time()))
         conn.commit()
+        conn.close()
 
         ACTIVE_SESSIONS[token] = row
 
