@@ -38,8 +38,16 @@ def init_db():
             wins INTEGER DEFAULT 0,
             blackjacks INTEGER DEFAULT 0,
             biggest_win INTEGER DEFAULT 0,
+            total_won INTEGER DEFAULT 0,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             last_bonus REAL DEFAULT 0
+        )
+    """)
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS sessions (
+            token TEXT PRIMARY KEY,
+            user_id INTEGER NOT NULL,
+            created_at REAL DEFAULT 0
         )
     """)
     conn.commit()
@@ -53,11 +61,46 @@ def get_db():
     conn.row_factory = sqlite3.Row
     return conn
 
-# Active sessions: token -> user_dict
+# Active sessions cache: token -> user_dict
 ACTIVE_SESSIONS = {}
 
 def get_user_by_token(token: str):
-    return ACTIVE_SESSIONS.get(token)
+    if not token:
+        return None
+    # 1. Check in-memory cache
+    if token in ACTIVE_SESSIONS:
+        return ACTIVE_SESSIONS[token]
+
+    # 2. Check persistent DB sessions
+    try:
+        conn = get_db()
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT u.* FROM users u
+            JOIN sessions s ON u.id = s.user_id
+            WHERE s.token = ?
+        """, (token,))
+        row = cur.fetchone()
+
+        # 3. Fallback for local-token-{uid}
+        if not row and token.startswith("local-token-"):
+            try:
+                uid = int(token.replace("local-token-", ""))
+                cur.execute("SELECT * FROM users WHERE id = ?", (uid,))
+                row = cur.fetchone()
+            except Exception:
+                pass
+
+        conn.close()
+        if row:
+            user_dict = dict(row)
+            if "password_hash" in user_dict:
+                del user_dict["password_hash"]
+            ACTIVE_SESSIONS[token] = user_dict
+            return user_dict
+    except Exception as e:
+        print("get_user_by_token DB error:", e)
+    return None
 
 # ==============================================================================
 # Card & Shoe Engine
@@ -147,6 +190,11 @@ class MultiplayerTable:
         
         self.lock = asyncio.Lock()
         self.loop_task = None
+        self.payout_skip_event = None
+
+    def skip_payout(self):
+        if self.payout_skip_event and not self.payout_skip_event.is_set():
+            self.payout_skip_event.set()
 
     def start_loop(self):
         if self.loop_task is None or self.loop_task.done():
@@ -179,12 +227,15 @@ class MultiplayerTable:
                     "avatar": s["user"]["avatar"],
                     "vipLevel": s["user"]["vip_level"],
                     "chips": s["user"]["chips"],
-                    "bet": s["bet"],
+                    "bet": sum(h["bet"] for h in s.get("splitHands", [])) if s.get("isSplit") else s["bet"],
                     "cards": s["cards"],
                     "calc": calculate_hand(s["cards"]) if s["cards"] else None,
                     "isDone": s["isDone"],
                     "isBusted": s["isBusted"],
-                    "result": s.get("result", None)
+                    "result": s.get("result", None),
+                    "isSplit": s.get("isSplit", False),
+                    "activeHandIdx": s.get("activeHandIdx", 0),
+                    "splitHands": s.get("splitHands", [])
                 })
 
         visible_dealer_cards = []
@@ -217,16 +268,17 @@ class MultiplayerTable:
 
     async def broadcast(self, payload):
         text = json.dumps(payload)
-        coros = []
+        unique_ws = set()
         for s in self.seats:
             if s and s["ws"] and not s["ws"].closed:
-                coros.append(s["ws"].send_str(text))
+                unique_ws.add(s["ws"])
         for ws in list(self.spectators):
             if not ws.closed:
-                coros.append(ws.send_str(text))
+                unique_ws.add(ws)
             else:
                 self.spectators.remove(ws)
-        if coros:
+        if unique_ws:
+            coros = [ws.send_str(text) for ws in unique_ws]
             await asyncio.gather(*coros, return_exceptions=True)
 
     async def add_spectator(self, ws):
@@ -244,6 +296,12 @@ class MultiplayerTable:
                         self.seats[i]["user"]["chips"] += self.seats[i]["bet"]
                         self.update_user_chips(self.seats[i]["user"]["id"], self.seats[i]["user"]["chips"])
                 self.seats[i] = None
+        seated = [s for s in self.seats if s is not None]
+        if not seated:
+            self.state = 'WAITING'
+            self.countdown = 0
+            self.dealer_cards = []
+            self.active_turn_seat = -1
 
     def update_user_chips(self, user_id, chips):
         try:
@@ -263,12 +321,20 @@ class MultiplayerTable:
             # Check if any player is seated
             seated_players = [s for s in self.seats if s is not None]
             if not seated_players:
-                self.state = 'WAITING'
-                self.dealer_cards = []
-                self.active_turn_seat = -1
+                if self.state != 'WAITING':
+                    self.state = 'WAITING'
+                    self.dealer_cards = []
+                    self.active_turn_seat = -1
+                    self.countdown = 0
+                    await self.broadcast(self.to_state_payload())
+                else:
+                    self.state = 'WAITING'
+                    self.dealer_cards = []
+                    self.active_turn_seat = -1
+                    self.countdown = 0
                 continue
 
-            # State 1: WAITING -> Start Betting Countdown
+            # State 1: WAITING -> Start Betting Countdown (Only if at least 1 player is seated)
             if self.state == 'WAITING':
                 self.state = 'BETTING'
                 self.countdown = 12
@@ -280,8 +346,17 @@ class MultiplayerTable:
                         s["bet"] = 0
                         s["isDone"] = False
                         s["isBusted"] = False
+                        s["isSurrendered"] = False
+                        s["isSplit"] = False
+                        s["splitHands"] = []
+                        s["activeHandIdx"] = 0
                         s["result"] = None
                 await self.broadcast(self.to_state_payload())
+                await self.broadcast({
+                    "type": "COUNTDOWN_TICK",
+                    "countdown": self.countdown,
+                    "message": f"Bahisler kapanıyor: {self.countdown}s"
+                })
 
             # State 2: BETTING Countdown
             elif self.state == 'BETTING':
@@ -308,10 +383,13 @@ class MultiplayerTable:
             elif self.state == 'TURNS':
                 if self.active_turn_seat != -1 and self.seats[self.active_turn_seat]:
                     self.turn_time_left -= 1
+                    s_active = self.seats[self.active_turn_seat]
                     await self.broadcast({
                         "type": "TURN_TICK",
                         "turnSeat": self.active_turn_seat,
-                        "timeLeft": self.turn_time_left
+                        "timeLeft": self.turn_time_left,
+                        "isSplit": s_active.get("isSplit", False),
+                        "activeHandIdx": s_active.get("activeHandIdx", 0)
                     })
                     if self.turn_time_left <= 0:
                         # Auto-stand on timeout
@@ -319,6 +397,15 @@ class MultiplayerTable:
 
     async def start_deal_phase(self):
         self.state = 'DEALING'
+        for s in self.seats:
+            if s:
+                s["cards"] = []
+                s["isDone"] = False
+                s["isBusted"] = False
+                s["isSurrendered"] = False
+                s["isSplit"] = False
+                s["splitHands"] = []
+                s["activeHandIdx"] = 0
         await self.broadcast(self.to_state_payload())
 
         # Check shoe penetration (reshuffle if less than 60 cards)
@@ -347,11 +434,13 @@ class MultiplayerTable:
             d_card = self.shoe.pop()
             self.dealer_cards.append(d_card)
             is_hidden = (round_idx == 1)
+            up_val = 11 if (self.dealer_cards[0].get("isAce")) else self.dealer_cards[0]["value"]
             await self.broadcast({
                 "type": "CARD_DEALT",
                 "target": "dealer",
                 "card": {"isHidden": True} if is_hidden else d_card,
-                "dealerTotal": 11 if (self.dealer_cards[0].get("isAce")) else self.dealer_cards[0]["value"]
+                "dealerTotal": up_val,
+                "dealerCalc": {"total": up_val}
             })
             await asyncio.sleep(0.5)
 
@@ -404,6 +493,48 @@ class MultiplayerTable:
         if not seat or seat["isDone"]:
             return
 
+        if seat.get("isSplit"):
+            active_idx = seat.get("activeHandIdx", 0)
+            hand = seat["splitHands"][active_idx]
+            if hand["isDone"]:
+                return
+            card = self.shoe.pop()
+            hand["cards"].append(card)
+            calc = calculate_hand(hand["cards"])
+            hand["calc"] = calc
+            if calc["isBust"]:
+                hand["isBusted"] = True
+                hand["isDone"] = True
+                if active_idx == 0:
+                    seat["activeHandIdx"] = 1
+                else:
+                    seat["isDone"] = True
+            elif calc["total"] == 21:
+                hand["isDone"] = True
+                if active_idx == 0:
+                    seat["activeHandIdx"] = 1
+                else:
+                    seat["isDone"] = True
+
+            await self.broadcast({
+                "type": "SPLIT_HAND_UPDATED",
+                "seatIndex": seat_idx,
+                "username": seat["user"]["username"],
+                "handIndex": active_idx,
+                "card": card,
+                "calc": calc,
+                "isDone": hand["isDone"],
+                "isBust": calc["isBust"],
+                "activeHandIdx": seat["activeHandIdx"]
+            })
+
+            if seat["isDone"]:
+                await asyncio.sleep(1)
+                await self.advance_turn(seat_idx)
+            else:
+                self.turn_time_left = 15
+            return
+
         card = self.shoe.pop()
         seat["cards"].append(card)
         calc = calculate_hand(seat["cards"])
@@ -438,6 +569,34 @@ class MultiplayerTable:
         seat = self.seats[seat_idx]
         if not seat:
             return
+
+        if seat.get("isSplit"):
+            active_idx = seat.get("activeHandIdx", 0)
+            hand = seat["splitHands"][active_idx]
+            hand["isDone"] = True
+            if active_idx == 0:
+                seat["activeHandIdx"] = 1
+                self.turn_time_left = 15
+                await self.broadcast({
+                    "type": "SPLIT_HAND_STAND",
+                    "seatIndex": seat_idx,
+                    "username": seat["user"]["username"],
+                    "handIndex": 0,
+                    "nextHandIndex": 1
+                })
+            else:
+                seat["isDone"] = True
+                await self.broadcast({
+                    "type": "SPLIT_HAND_STAND",
+                    "seatIndex": seat_idx,
+                    "username": seat["user"]["username"],
+                    "handIndex": 1,
+                    "nextHandIndex": -1
+                })
+                await asyncio.sleep(0.5)
+                await self.advance_turn(seat_idx)
+            return
+
         seat["isDone"] = True
         await self.broadcast({
             "type": "PLAYER_STAND",
@@ -451,10 +610,76 @@ class MultiplayerTable:
         if self.state != 'TURNS' or self.active_turn_seat != seat_idx:
             return
         seat = self.seats[seat_idx]
-        if not seat or len(seat["cards"]) != 2:
+        if not seat:
             return
         user = seat["user"]
+
+        if seat.get("isSplit"):
+            active_idx = seat.get("activeHandIdx", 0)
+            hand = seat["splitHands"][active_idx]
+            if len(hand["cards"]) != 2 or hand["isDone"]:
+                await self.broadcast({
+                    "type": "TOAST",
+                    "username": user["username"],
+                    "message": "İkiye katlama yalnızca ilk 2 kartta yapılabilir!"
+                })
+                return
+            if user["chips"] < hand["bet"]:
+                await self.broadcast({
+                    "type": "TOAST",
+                    "username": user["username"],
+                    "message": f"İkiye katlamak için yeterli çipiniz yok! (Gereken: ${hand['bet']:,})"
+                })
+                return
+            user["chips"] -= hand["bet"]
+            hand["bet"] *= 2
+            seat["bet"] = sum(h["bet"] for h in seat["splitHands"])
+            self.update_user_chips(user["id"], user["chips"])
+            card = self.shoe.pop()
+            hand["cards"].append(card)
+            calc = calculate_hand(hand["cards"])
+            hand["calc"] = calc
+            hand["isDone"] = True
+            if calc["isBust"]:
+                hand["isBusted"] = True
+            
+            if active_idx == 0:
+                seat["activeHandIdx"] = 1
+                self.turn_time_left = 15
+            else:
+                seat["isDone"] = True
+
+            await self.broadcast({
+                "type": "SPLIT_HAND_DOUBLED",
+                "seatIndex": seat_idx,
+                "username": user["username"],
+                "handIndex": active_idx,
+                "card": card,
+                "calc": calc,
+                "newBet": hand["bet"],
+                "seatBet": seat["bet"],
+                "chips": user["chips"],
+                "activeHandIdx": seat["activeHandIdx"]
+            })
+
+            if seat["isDone"]:
+                await asyncio.sleep(1)
+                await self.advance_turn(seat_idx)
+            return
+
+        if len(seat["cards"]) != 2:
+            await self.broadcast({
+                "type": "TOAST",
+                "username": seat["user"]["username"],
+                "message": "İkiye katlama yalnızca ilk iki kartta yapılabilir!"
+            })
+            return
         if user["chips"] < seat["bet"]:
+            await self.broadcast({
+                "type": "TOAST",
+                "username": user["username"],
+                "message": f"İkiye katlamak için yeterli çipiniz yok! (Gereken: ${seat['bet']:,})"
+            })
             return
 
         user["chips"] -= seat["bet"]
@@ -471,6 +696,7 @@ class MultiplayerTable:
         await self.broadcast({
             "type": "PLAYER_DOUBLED",
             "seatIndex": seat_idx,
+            "username": user["username"],
             "card": card,
             "calc": calc,
             "newBet": seat["bet"],
@@ -479,6 +705,139 @@ class MultiplayerTable:
         await asyncio.sleep(1)
         await self.advance_turn(seat_idx)
 
+    async def player_surrender(self, seat_idx):
+        if self.state != 'TURNS' or self.active_turn_seat != seat_idx:
+            return
+        seat = self.seats[seat_idx]
+        if not seat:
+            return
+        if seat.get("isSplit") or len(seat.get("cards", [])) != 2:
+            await self.broadcast({
+                "type": "TOAST",
+                "username": seat["user"]["username"],
+                "message": "Pes etme yalnızca ilk iki kartta yapılabilir!"
+            })
+            return
+        user = seat["user"]
+        refund = seat["bet"] // 2
+        user["chips"] += refund
+        seat["bet"] = 0
+        seat["isDone"] = True
+        seat["isSurrendered"] = True
+        self.update_user_chips(user["id"], user["chips"])
+
+        await self.broadcast({
+            "type": "PLAYER_SURRENDERED",
+            "seatIndex": seat_idx,
+            "username": user["username"],
+            "refund": refund,
+            "chips": user["chips"]
+        })
+        await asyncio.sleep(0.8)
+        await self.advance_turn(seat_idx)
+
+    async def player_split(self, seat_idx):
+        if self.state != 'TURNS' or self.active_turn_seat != seat_idx:
+            return
+        seat = self.seats[seat_idx]
+        if not seat:
+            return
+        if seat.get("isSplit"):
+            await self.broadcast({
+                "type": "TOAST",
+                "username": seat["user"]["username"],
+                "message": "Bir turda yalnızca bir kez bölme yapılabilir!"
+            })
+            return
+        if len(seat.get("cards", [])) != 2:
+            await self.broadcast({
+                "type": "TOAST",
+                "username": seat["user"]["username"],
+                "message": "Bölme işlemi yalnızca ilk 2 kartta yapılabilir!"
+            })
+            return
+        
+        c1, c2 = seat["cards"][0], seat["cards"][1]
+        c1_val = 10 if c1["rank"] in ['10', 'J', 'Q', 'K'] else (11 if c1["rank"] == 'A' else int(c1["rank"]))
+        c2_val = 10 if c2["rank"] in ['10', 'J', 'Q', 'K'] else (11 if c2["rank"] == 'A' else int(c2["rank"]))
+        
+        if c1["rank"] != c2["rank"] and c1_val != c2_val:
+            await self.broadcast({
+                "type": "TOAST",
+                "username": seat["user"]["username"],
+                "message": f"Bölme yalnızca aynı değerdeki çift kartlarda yapılabilir! ({c1['rank']} ve {c2['rank']} bölünemez)"
+            })
+            return
+
+        user = seat["user"]
+        if user["chips"] < seat["bet"]:
+            await self.broadcast({
+                "type": "TOAST",
+                "username": user["username"],
+                "message": f"Bölmek için yeterli çipiniz yok! (Gereken: ${seat['bet']:,})"
+            })
+            return
+
+        # Deduct matching bet for second hand
+        user["chips"] -= seat["bet"]
+        self.update_user_chips(user["id"], user["chips"])
+
+        # Deal one replacement card to each split hand
+        new_c1 = self.shoe.pop()
+        new_c2 = self.shoe.pop()
+
+        is_ace_split = (c1["rank"] == 'A')
+
+        hand0 = {
+            "cards": [c1, new_c1],
+            "calc": calculate_hand([c1, new_c1]),
+            "bet": seat["bet"],
+            "isDone": is_ace_split,
+            "isBusted": False
+        }
+        hand1 = {
+            "cards": [c2, new_c2],
+            "calc": calculate_hand([c2, new_c2]),
+            "bet": seat["bet"],
+            "isDone": is_ace_split,
+            "isBusted": False
+        }
+
+        seat["isSplit"] = True
+        seat["splitHands"] = [hand0, hand1]
+        seat["activeHandIdx"] = 0
+        seat["bet"] = sum(h["bet"] for h in seat["splitHands"])
+        if is_ace_split:
+            seat["isDone"] = True
+
+        await self.broadcast({
+            "type": "PLAYER_SPLIT",
+            "seatIndex": seat_idx,
+            "username": user["username"],
+            "chips": user["chips"],
+            "bet": seat["bet"],
+            "hands": [
+                { "cards": hand0["cards"], "calc": hand0["calc"], "bet": hand0["bet"], "isDone": hand0["isDone"] },
+                { "cards": hand1["cards"], "calc": hand1["calc"], "bet": hand1["bet"], "isDone": hand1["isDone"] }
+            ],
+            "activeHandIdx": 0 if not is_ace_split else -1
+        })
+
+        if is_ace_split:
+            await self.broadcast({
+                "type": "TOAST",
+                "username": user["username"],
+                "message": "Aslar bölündü! Her iki ele tek kart verildi ve tur tamamlandı."
+            })
+            await asyncio.sleep(1)
+            await self.advance_turn(seat_idx)
+        else:
+            await self.broadcast({
+                "type": "TOAST",
+                "username": user["username"],
+                "message": "El ikiye bölündü! 1. El ile devam ediyorsunuz."
+            })
+
     async def start_dealer_turn(self):
         self.state = 'DEALER'
         self.active_turn_seat = -1
@@ -486,8 +845,18 @@ class MultiplayerTable:
         await self.broadcast(self.to_state_payload())
         await asyncio.sleep(0.8)
 
-        # If all non-surrendered players busted, dealer doesn't need to draw
-        any_survivor = any(s for s in self.seats if s and s["bet"] > 0 and not s["isBusted"])
+        # Check if dealer needs to draw
+        any_survivor = False
+        for s in self.seats:
+            if s and s["bet"] > 0:
+                if s.get("isSplit"):
+                    if any(not h.get("isBusted") for h in s.get("splitHands", [])):
+                        any_survivor = True
+                        break
+                elif not s.get("isBusted") and not s.get("isSurrendered"):
+                    any_survivor = True
+                    break
+
         if any_survivor:
             dealer_calc = calculate_hand(self.dealer_cards)
             while dealer_calc["total"] < 17:
@@ -498,6 +867,7 @@ class MultiplayerTable:
                     "type": "CARD_DEALT",
                     "target": "dealer",
                     "card": c,
+                    "dealerTotal": dealer_calc["total"],
                     "dealerCalc": dealer_calc
                 })
                 await asyncio.sleep(0.8)
@@ -521,13 +891,94 @@ class MultiplayerTable:
                 continue
 
             user = s["user"]
+
+            if s.get("isSplit"):
+                total_split_win = 0
+                split_res = []
+                for h_idx, h in enumerate(s.get("splitHands", [])):
+                    h_calc = h["calc"]
+                    h_total = h_calc["total"]
+                    h_bj = h_calc["isBlackjack"]
+                    h_bust = h.get("isBusted", False) or h_calc["isBust"]
+                    h_win = 0
+                    h_outcome = ""
+
+                    if h_bust:
+                        h_outcome = "lose"
+                        h_win = 0
+                    elif dealer_bj:
+                        if h_bj:
+                            h_outcome = "push"
+                            h_win = h["bet"]
+                        else:
+                            h_outcome = "lose"
+                            h_win = 0
+                    elif h_bj:
+                        h_outcome = "blackjack"
+                        h_win = int(h["bet"] * 2.5)
+                    elif dealer_bust:
+                        h_outcome = "win"
+                        h_win = h["bet"] * 2
+                    elif h_total > dealer_total:
+                        h_outcome = "win"
+                        h_win = h["bet"] * 2
+                    elif h_total < dealer_total:
+                        h_outcome = "lose"
+                        h_win = 0
+                    else:
+                        h_outcome = "push"
+                        h_win = h["bet"]
+
+                    total_split_win += h_win
+                    split_res.append({
+                        "handIndex": h_idx,
+                        "bet": h["bet"],
+                        "outcome": h_outcome,
+                        "winAmount": h_win,
+                        "total": h_total
+                    })
+
+                    user["hands_played"] += 1
+                    if h_outcome in ['win', 'blackjack']:
+                        user["wins"] += 1
+                        user["total_won"] = user.get("total_won", 0) + h_win
+                        if h_win > user["biggest_win"]:
+                            user["biggest_win"] = h_win
+                    if h_outcome == 'blackjack':
+                        user["blackjacks"] += 1
+
+                user["chips"] += total_split_win
+                cur.execute("""
+                    UPDATE users SET 
+                        chips = ?, hands_played = ?, wins = ?, 
+                        blackjacks = ?, biggest_win = ?, total_won = ?
+                    WHERE id = ?
+                """, (user["chips"], user["hands_played"], user["wins"], 
+                      user["blackjacks"], user["biggest_win"], user.get("total_won", 0), user["id"]))
+
+                seat_total_bet = sum(h["bet"] for h in s.get("splitHands", []))
+                split_outcome = "win" if total_split_win > seat_total_bet else ("push" if total_split_win == seat_total_bet else "lose")
+                payout_results.append({
+                    "seatIndex": i,
+                    "username": user["username"],
+                    "isSplit": True,
+                    "bet": seat_total_bet,
+                    "totalBet": seat_total_bet,
+                    "splitResults": split_res,
+                    "outcome": split_outcome,
+                    "winAmount": total_split_win,
+                    "chips": user["chips"]
+                })
+                continue
+
             calc = calculate_hand(s["cards"])
             p_total = calc["total"]
             p_bj = calc["isBlackjack"]
             win_amount = 0
             outcome = ""
 
-            if s["isBusted"]:
+            is_bust = s.get("isBusted", False) or calc["isBust"]
+            if is_bust:
                 outcome = "lose"
                 win_amount = 0
             elif dealer_bj:
@@ -558,6 +1009,7 @@ class MultiplayerTable:
             user["hands_played"] += 1
             if outcome in ['win', 'blackjack']:
                 user["wins"] += 1
+                user["total_won"] = user.get("total_won", 0) + win_amount
                 if win_amount > user["biggest_win"]:
                     user["biggest_win"] = win_amount
             if outcome == 'blackjack':
@@ -567,14 +1019,17 @@ class MultiplayerTable:
             cur.execute("""
                 UPDATE users SET 
                     chips = ?, hands_played = ?, wins = ?, 
-                    blackjacks = ?, biggest_win = ?
+                    blackjacks = ?, biggest_win = ?, total_won = ?
                 WHERE id = ?
             """, (user["chips"], user["hands_played"], user["wins"], 
-                  user["blackjacks"], user["biggest_win"], user["id"]))
+                  user["blackjacks"], user["biggest_win"], user.get("total_won", 0), user["id"]))
 
             payout_results.append({
                 "seatIndex": i,
                 "username": user["username"],
+                "bet": s["bet"],
+                "calc": calc,
+                "total": p_total,
                 "outcome": outcome,
                 "winAmount": win_amount,
                 "chips": user["chips"]
@@ -589,9 +1044,29 @@ class MultiplayerTable:
             "results": payout_results
         })
 
-        # Wait 6 seconds before starting the next betting round
-        await asyncio.sleep(6)
+        # Allow instant skip via "Tekrar Oyna" or max 4.5 seconds showcase
+        self.payout_skip_event = asyncio.Event()
+        try:
+            await asyncio.wait_for(self.payout_skip_event.wait(), timeout=4.5)
+        except asyncio.TimeoutError:
+            pass
+        self.dealer_cards = []
+        self.dealer_hole_hidden = True
+        self.active_turn_seat = -1
+        self.countdown = 0
+        for s in self.seats:
+            if s:
+                s["cards"] = []
+                s["bet"] = 0
+                s["isDone"] = False
+                s["isBusted"] = False
+                s["isSurrendered"] = False
+                s["isSplit"] = False
+                s["splitHands"] = []
+                s["activeHandIdx"] = 0
+                s["result"] = None
         self.state = 'WAITING'
+        await self.broadcast(self.to_state_payload())
 
 # ==============================================================================
 # Lobby & Room Manager
@@ -646,6 +1121,9 @@ async def api_register(request):
         del row["password_hash"]
 
         token = secrets.token_hex(24)
+        cur.execute("INSERT OR REPLACE INTO sessions (token, user_id, created_at) VALUES (?, ?, ?)", (token, user_id, time.time()))
+        conn.commit()
+
         ACTIVE_SESSIONS[token] = row
 
         return web.json_response({"success": True, "token": token, "user": row})
@@ -663,15 +1141,19 @@ async def api_login(request):
         pw_hash = hash_pw(password)
         cur.execute("SELECT * FROM users WHERE username = ? AND password_hash = ?", (username, pw_hash))
         row = cur.fetchone()
-        conn.close()
 
         if not row:
+            conn.close()
             return web.json_response({"success": False, "error": "Kullanıcı adı veya şifre hatalı!"})
 
         user_dict = dict(row)
         del user_dict["password_hash"]
 
         token = secrets.token_hex(24)
+        cur.execute("INSERT OR REPLACE INTO sessions (token, user_id, created_at) VALUES (?, ?, ?)", (token, user_dict["id"], time.time()))
+        conn.commit()
+        conn.close()
+
         ACTIVE_SESSIONS[token] = user_dict
 
         return web.json_response({"success": True, "token": token, "user": user_dict})
@@ -681,6 +1163,22 @@ async def api_login(request):
 async def api_me(request):
     token = request.headers.get("Authorization", "").replace("Bearer ", "")
     user = get_user_by_token(token)
+    if not user:
+        username = request.headers.get("X-Username")
+        if username:
+            conn = get_db()
+            cur = conn.cursor()
+            cur.execute("SELECT * FROM users WHERE username = ?", (username,))
+            row = cur.fetchone()
+            if row:
+                user = dict(row)
+                del user["password_hash"]
+                if token:
+                    cur.execute("INSERT OR REPLACE INTO sessions (token, user_id, created_at) VALUES (?, ?, ?)", (token, user["id"], time.time()))
+                    conn.commit()
+                ACTIVE_SESSIONS[token] = user
+            conn.close()
+
     if not user:
         return web.json_response({"success": False, "error": "Oturum geçersiz"}, status=401)
     
@@ -715,7 +1213,7 @@ async def api_daily_bonus(request):
             "error": f"Günlük bonus için {remain_hrs} saat beklemelisiniz!"
         })
 
-    bonus_amount = 2500
+    bonus_amount = 1000
     new_chips = row["chips"] + bonus_amount
     cur.execute("UPDATE users SET chips = ?, last_bonus = ? WHERE id = ?", (new_chips, now, user["id"]))
     conn.commit()
@@ -732,8 +1230,8 @@ async def api_leaderboard(request):
     conn = get_db()
     cur = conn.cursor()
     cur.execute("""
-        SELECT username, avatar, chips, vip_level, wins, hands_played, biggest_win 
-        FROM users ORDER BY chips DESC LIMIT 10
+        SELECT username, avatar, chips, vip_level, wins, hands_played, biggest_win, total_won 
+        FROM users ORDER BY wins DESC, total_won DESC, CAST(chips AS INTEGER) DESC LIMIT 10
     """)
     rows = [dict(r) for r in cur.fetchall()]
     conn.close()
@@ -760,7 +1258,25 @@ async def ws_handler(request):
                 # 1. Join Table as Spectator
                 if action == "JOIN_TABLE":
                     token = data.get("token")
+                    username = data.get("username")
                     current_user = get_user_by_token(token)
+                    if not current_user and username:
+                        try:
+                            conn = get_db()
+                            cur = conn.cursor()
+                            cur.execute("SELECT * FROM users WHERE username = ?", (username,))
+                            row = cur.fetchone()
+                            if row:
+                                current_user = dict(row)
+                                if "password_hash" in current_user:
+                                    del current_user["password_hash"]
+                                if token:
+                                    cur.execute("INSERT OR REPLACE INTO sessions (token, user_id, created_at) VALUES (?, ?, ?)", (token, current_user["id"], time.time()))
+                                    conn.commit()
+                                ACTIVE_SESSIONS[token] = current_user
+                            conn.close()
+                        except Exception as e:
+                            print("Auto-heal session err:", e)
                     table_id = data.get("tableId")
                     if table_id in TABLES:
                         if current_table:
@@ -768,7 +1284,7 @@ async def ws_handler(request):
                         current_table = TABLES[table_id]
                         await current_table.add_spectator(ws)
 
-                # 2. Sit at Seat
+                # 2. Sit at Seat (Allows player to sit at multiple seats)
                 elif action == "TAKE_SEAT":
                     if not current_table or not current_user:
                         await ws.send_str(json.dumps({"type": "ERROR", "message": "Önce giriş yapmalısınız!"}))
@@ -776,11 +1292,7 @@ async def ws_handler(request):
                     seat_idx = data.get("seatIndex")
                     if 0 <= seat_idx < current_table.max_seats:
                         if current_table.seats[seat_idx] is None:
-                            # Remove from any existing seat
-                            for i in range(current_table.max_seats):
-                                if current_table.seats[i] and current_table.seats[i]["user"]["id"] == current_user["id"]:
-                                    current_table.seats[i] = None
-
+                            # In real Blackjack, a player can take 1, 2, or all 3 seats!
                             current_table.seats[seat_idx] = {
                                 "user": current_user,
                                 "bet": 0,
@@ -789,74 +1301,157 @@ async def ws_handler(request):
                                 "isBusted": False,
                                 "ws": ws
                             }
-                            current_seat_idx = seat_idx
                             if ws in current_table.spectators:
                                 current_table.spectators.remove(ws)
+                            if current_table.state == 'WAITING':
+                                current_table.state = 'BETTING'
+                                current_table.countdown = 12
+                                current_table.dealer_cards = []
+                                current_table.dealer_hole_hidden = True
+                                for s in current_table.seats:
+                                    if s:
+                                        s["cards"] = []
+                                        s["bet"] = 0
+                                        s["isDone"] = False
+                                        s["isBusted"] = False
+                                        s["result"] = None
                             await current_table.broadcast(current_table.to_state_payload())
 
                 # 3. Leave Seat
                 elif action == "LEAVE_SEAT":
-                    if current_table and current_seat_idx is not None:
-                        current_table.seats[current_seat_idx] = None
-                        current_seat_idx = None
-                        current_table.spectators.add(ws)
+                    seat_idx = data.get("seatIndex")
+                    if current_table:
+                        if seat_idx is not None and 0 <= seat_idx < current_table.max_seats:
+                            if current_table.seats[seat_idx] and current_table.seats[seat_idx]["user"]["id"] == current_user["id"]:
+                                current_table.seats[seat_idx] = None
+                        else:
+                            # Leave all seats
+                            for i in range(current_table.max_seats):
+                                if current_table.seats[i] and current_table.seats[i]["user"]["id"] == current_user["id"]:
+                                    current_table.seats[i] = None
+                        # If no remaining seats, become spectator
+                        has_any_seat = any(s and s["user"]["id"] == current_user["id"] for s in current_table.seats)
+                        if not has_any_seat:
+                            current_table.spectators.add(ws)
+                        # If table is now empty, reset to WAITING
+                        seated_left = [s for s in current_table.seats if s is not None]
+                        if not seated_left:
+                            current_table.state = 'WAITING'
+                            current_table.countdown = 0
+                            current_table.dealer_cards = []
+                            current_table.active_turn_seat = -1
                         await current_table.broadcast(current_table.to_state_payload())
 
-                # 4. Place Bet
+                # 4. Place Bet (Supports targeting any of the player's seated seats)
                 elif action == "PLACE_BET":
                     amount = int(data.get("amount", 0))
-                    if current_table and current_seat_idx is not None:
-                        if current_table.state == 'BETTING':
-                            seat = current_table.seats[current_seat_idx]
-                            if seat:
-                                if current_user["chips"] < amount:
-                                    await ws.send_str(json.dumps({
-                                        "type": "ANNOUNCEMENT",
-                                        "message": "Yetersiz bakiye!"
-                                    }))
-                                elif seat["bet"] + amount > current_table.max_bet:
-                                    await ws.send_str(json.dumps({
-                                        "type": "ANNOUNCEMENT",
-                                        "message": f"Bu masanın maksimum bahis limiti: ${current_table.max_bet:,}"
-                                    }))
-                                else:
-                                    current_user["chips"] -= amount
-                                    seat["bet"] += amount
-                                    current_table.update_user_chips(current_user["id"], current_user["chips"])
-                                    await current_table.broadcast({
-                                        "type": "BET_PLACED",
-                                        "seatIndex": current_seat_idx,
-                                        "bet": seat["bet"],
-                                        "chips": current_user["chips"]
-                                    })
+                    seat_idx = data.get("seatIndex")
+                    if current_table and current_table.state == 'BETTING' and current_user:
+                        target_seat = None
+                        target_idx = None
+                        if seat_idx is not None and 0 <= seat_idx < current_table.max_seats:
+                            s = current_table.seats[seat_idx]
+                            if s and s["user"]["id"] == current_user["id"]:
+                                target_seat = s
+                                target_idx = seat_idx
+                        else:
+                            # Default to player's first seat
+                            for i in range(current_table.max_seats):
+                                if current_table.seats[i] and current_table.seats[i]["user"]["id"] == current_user["id"]:
+                                    target_seat = current_table.seats[i]
+                                    target_idx = i
+                                    break
+
+                        if target_seat and target_idx is not None:
+                            if current_user["chips"] < amount:
+                                await ws.send_str(json.dumps({
+                                    "type": "ANNOUNCEMENT",
+                                    "message": "Yetersiz bakiye!"
+                                }))
+                            elif target_seat["bet"] + amount > current_table.max_bet:
+                                await ws.send_str(json.dumps({
+                                    "type": "ANNOUNCEMENT",
+                                    "message": f"Bu masanın maksimum bahis limiti: ${current_table.max_bet:,}"
+                                }))
+                            else:
+                                current_user["chips"] -= amount
+                                target_seat["bet"] += amount
+                                current_table.update_user_chips(current_user["id"], current_user["chips"])
+                                await current_table.broadcast({
+                                    "type": "BET_PLACED",
+                                    "seatIndex": target_idx,
+                                    "bet": target_seat["bet"],
+                                    "chips": current_user["chips"]
+                                })
 
                 # 5. Clear Bet
                 elif action == "CLEAR_BET":
-                    if current_table and current_seat_idx is not None and current_table.state == 'BETTING':
-                        seat = current_table.seats[current_seat_idx]
-                        if seat and seat["bet"] > 0:
-                            current_user["chips"] += seat["bet"]
-                            seat["bet"] = 0
-                            current_table.update_user_chips(current_user["id"], current_user["chips"])
-                            await current_table.broadcast({
-                                "type": "BET_PLACED",
-                                "seatIndex": current_seat_idx,
-                                "bet": 0,
-                                "chips": current_user["chips"]
-                            })
+                    seat_idx = data.get("seatIndex")
+                    if current_table and current_table.state == 'BETTING' and current_user:
+                        if seat_idx is not None and 0 <= seat_idx < current_table.max_seats:
+                            s = current_table.seats[seat_idx]
+                            if s and s["user"]["id"] == current_user["id"] and s["bet"] > 0:
+                                current_user["chips"] += s["bet"]
+                                s["bet"] = 0
+                                current_table.update_user_chips(current_user["id"], current_user["chips"])
+                                await current_table.broadcast({
+                                    "type": "BET_PLACED",
+                                    "seatIndex": seat_idx,
+                                    "bet": 0,
+                                    "chips": current_user["chips"]
+                                })
+                        else:
+                            # Clear all seats belonging to user
+                            for i in range(current_table.max_seats):
+                                s = current_table.seats[i]
+                                if s and s["user"]["id"] == current_user["id"] and s["bet"] > 0:
+                                    current_user["chips"] += s["bet"]
+                                    s["bet"] = 0
+                                    current_table.update_user_chips(current_user["id"], current_user["chips"])
+                                    await current_table.broadcast({
+                                        "type": "BET_PLACED",
+                                        "seatIndex": i,
+                                        "bet": 0,
+                                        "chips": current_user["chips"]
+                                    })
+                # 6. Gameplay Actions (Hit, Stand, Double, Split, Surrender) - applies to selected or active turn seat
+                elif action in ["HIT", "STAND", "DOUBLE", "SPLIT", "SURRENDER"]:
+                    if current_table and current_user and current_table.state == 'TURNS':
+                        req_seat_idx = data.get("seatIndex")
+                        if req_seat_idx is not None and 0 <= req_seat_idx < current_table.max_seats:
+                            cand_seat = current_table.seats[req_seat_idx]
+                            if cand_seat and cand_seat["user"]["id"] == current_user["id"] and cand_seat["bet"] > 0 and not cand_seat["isDone"]:
+                                current_table.active_turn_seat = req_seat_idx
+                        
+                        target_seat_idx = current_table.active_turn_seat
+                        if target_seat_idx != -1:
+                            turn_seat = current_table.seats[target_seat_idx]
+                            if turn_seat and turn_seat["user"]["id"] == current_user["id"] and not turn_seat["isDone"]:
+                                if action == "HIT":
+                                    await current_table.player_hit(target_seat_idx)
+                                elif action == "STAND":
+                                    await current_table.player_stand(target_seat_idx)
+                                elif action == "DOUBLE":
+                                    await current_table.player_double(target_seat_idx)
+                                elif action == "SPLIT":
+                                    await current_table.player_split(target_seat_idx)
+                                elif action == "SURRENDER":
+                                    await current_table.player_surrender(target_seat_idx)
 
-                # 6. Gameplay Actions (Hit, Stand, Double)
-                elif action == "HIT":
-                    if current_table and current_seat_idx is not None:
-                        await current_table.player_hit(current_seat_idx)
-
-                elif action == "STAND":
-                    if current_table and current_seat_idx is not None:
-                        await current_table.player_stand(current_seat_idx)
-
-                elif action == "DOUBLE":
-                    if current_table and current_seat_idx is not None:
-                        await current_table.player_double(current_seat_idx)
+                elif action == "SELECT_ACTIVE_SEAT":
+                    seat_idx = data.get("seatIndex")
+                    if current_table and current_user and current_table.state == 'TURNS' and seat_idx is not None:
+                        if 0 <= seat_idx < current_table.max_seats:
+                            target_seat = current_table.seats[seat_idx]
+                            if target_seat and target_seat["user"]["id"] == current_user["id"] and target_seat["bet"] > 0 and not target_seat["isDone"]:
+                                current_table.active_turn_seat = seat_idx
+                                current_table.turn_time_left = 15
+                                await current_table.broadcast({
+                                    "type": "PLAYER_TURN_START",
+                                    "seatIndex": seat_idx,
+                                    "username": current_user["username"],
+                                    "timeLeft": 15
+                                })
 
                 # 7. Live Table Chat
                 elif action == "CHAT":
@@ -870,8 +1465,17 @@ async def ws_handler(request):
                             "time": time.strftime("%H:%M")
                         })
 
+                # 8. Skip Payout Delay / Immediate Next Round
+                elif action in ["NEXT_ROUND", "SKIP_PAYOUT"]:
+                    if current_table and current_table.state == 'PAYOUT':
+                        current_table.skip_payout()
+
     finally:
         if current_table:
+            # Vacate seats belonging to this connection
+            for i in range(current_table.max_seats):
+                if current_table.seats[i] and (current_table.seats[i].get("ws") == ws or (current_user and current_table.seats[i]["user"]["id"] == current_user["id"])):
+                    current_table.seats[i] = None
             current_table.remove_client(ws)
             await current_table.broadcast(current_table.to_state_payload())
 
@@ -914,6 +1518,7 @@ def create_app():
     # Serve static assets
     app.router.add_static('/css/', path=os.path.join(BASE_DIR, 'css'), name='css')
     app.router.add_static('/js/', path=os.path.join(BASE_DIR, 'js'), name='js')
+    app.router.add_static('/assets/', path=os.path.join(BASE_DIR, 'assets'), name='assets')
     
     async def index(request):
         return web.FileResponse(os.path.join(BASE_DIR, 'index.html'))

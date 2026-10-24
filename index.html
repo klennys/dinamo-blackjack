@@ -17,7 +17,7 @@
          ====================================================================== -->
     <div id="view-lobby" class="casino-view view-lobby">
         
-        <!-- Lobby Top Navigation -->
+        <!-- Lobby Top VIP Navigation Bar (Exact Reference Match) -->
         <header class="lobby-header">
             <div class="lobby-brand-box">
                 <div class="brand-stacked-logo">
@@ -29,17 +29,17 @@
 
             <!-- User Profile HUD in Lobby -->
             <div class="lobby-user-hud">
-                <button id="btn-claim-bonus" class="btn-daily-bonus" title="Günlük Ücretsiz Çip Al">
+                <button id="btn-claim-bonus" class="btn-daily-bonus" title="Günlük $1,000 Ücretsiz Çip Al">
                     <span class="bonus-icon">🎁</span>
-                    <span class="bonus-text">GÜNLÜK BONUS</span>
+                    <span class="bonus-text">GÜNLÜK $1K BONUS</span>
                 </button>
 
                 <div id="lobby-profile-pill" class="profile-pill-card">
-                    <div id="lobby-user-avatar" class="avatar-bubble">👑</div>
-                    <div class="profile-info-col">
-                        <span id="lobby-username" class="profile-name">Giriş Yapılmadı</span>
-                        <span id="lobby-chips" class="profile-chips gold-text">$0</span>
-                    </div>
+                    <span class="hud-diamond-icon">💎</span>
+                    <span id="lobby-username" class="profile-name">Giriş Yapılmadı</span>
+                    <span class="profile-chips-divider">|</span>
+                    <span id="lobby-chips" class="profile-chips">$0</span>
+                    <span id="lobby-user-avatar" class="avatar-bubble hidden">👑</span>
                 </div>
 
                 <button id="btn-open-leaderboard" class="btn-icon-pill" title="Liderlik Tablosu">
@@ -47,100 +47,333 @@
                     <span class="label">LİDERLER</span>
                 </button>
 
-                <button id="btn-lobby-settings" class="btn-icon-pill" title="Ayarlar">
-                    <span class="icon">⚙️</span>
+                <button id="btn-lobby-notifications" class="btn-icon-pill btn-icon-only" title="Bildirimler">
+                    <span class="icon">🔔</span>
                 </button>
 
                 <button id="btn-auth-trigger" class="btn-auth-login">
-                    <span>GİRİŞ YAP</span>
+                    <span>PROFİL</span>
                 </button>
             </div>
         </header>
 
-        <!-- Lobby Hero Banner -->
+        <!-- Lobby Hero Banner (Lüks Ana Menü - Referans Tasarımı) -->
         <section class="lobby-hero-banner">
+            <div class="hero-portal-ring"></div>
+            <div class="hero-gold-dust"></div>
+
             <div class="hero-content">
-                <h1 class="hero-title">CANLI VEGAS MASALARI</h1>
-                <p class="hero-sub">Gerçek oyuncularla masaya otur, stratejini konuştur ve Dinamo VIP liginde zirveye tırman!</p>
+                <div class="brand-stacked-logo hero-brand">
+                    <span class="brand-dinamo">DINAMO</span>
+                    <span class="brand-blackjack">BLACKJACK</span>
+                </div>
+                <p class="hero-slogan">PLAY • STRATEGY • WIN</p>
+                <div class="hero-actions">
+                    <button id="btn-quick-play" class="btn-hero-play" title="Hemen Masaya Gir">
+                        <span class="play-arrow">▶</span>
+                        <span>OYUNA BAŞLA</span>
+                    </button>
+                    <div class="hero-sub-actions">
+                        <button id="btn-hero-settings" class="btn-hero-glass">
+                            <span>⚙</span> AYARLAR
+                        </button>
+                        <button id="btn-hero-stats" class="btn-hero-glass">
+                            <span>📊</span> İSTATİSTİKLER
+                        </button>
+                        <button id="btn-hero-leaderboard" class="btn-hero-glass">
+                            <span>🏆</span> LİDERLER
+                        </button>
+                    </div>
+                </div>
+                <p class="hero-sub-notice">Gerçek çok oyunculu Las Vegas VIP masaları - 3'e 2 Blackjack Ödemesi</p>
             </div>
         </section>
 
         <!-- Tables Selection Grid -->
         <main class="lobby-tables-container">
             <div class="section-title-row">
-                <h2>Masa Seçimi</h2>
+                <h2>MASA SEÇİMİ</h2>
                 <span class="section-tag">CANLI ÇOK OYUNCULU SALONLAR</span>
             </div>
 
             <div class="tables-grid">
                 
-                <!-- Table 1: Rookie -->
+                <!-- Table 1: Rookie (Emerald Green) -->
                 <div class="table-card card-rookie" data-table="table-rookie">
-                    <div class="card-badge">BAŞLANGIÇ</div>
-                    <div class="card-icon">🍀</div>
-                    <h3 class="table-name">Acemi Salonu</h3>
-                    <div class="table-limits">Min: <strong>$5</strong> • Max: <strong>$2,000</strong></div>
-                    <div class="table-seat-meter">
-                        <span class="seat-label">Koltuklar:</span>
-                        <span class="seat-val" id="seats-table-rookie">0 / 3</span>
+                    <div class="card-ambient-glow"></div>
+                    <div class="card-badge">BAŞLANGIÇ KULÜBÜ</div>
+                    <div class="card-crest-wrapper">
+                        <svg class="card-crest-svg" viewBox="0 0 100 100" fill="none">
+                            <defs>
+                                <radialGradient id="cloverGlow" cx="50%" cy="50%" r="50%">
+                                    <stop offset="0%" stop-color="#10b981" stop-opacity="0.5"/>
+                                    <stop offset="100%" stop-color="#10b981" stop-opacity="0"/>
+                                </radialGradient>
+                                <linearGradient id="cardGradL" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="#ffffff"/>
+                                    <stop offset="100%" stop-color="#e2e8f0"/>
+                                </linearGradient>
+                                <linearGradient id="cardGradR" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="#f8fafc"/>
+                                    <stop offset="100%" stop-color="#cbd5e1"/>
+                                </linearGradient>
+                                <linearGradient id="chipGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="#34d399"/>
+                                    <stop offset="60%" stop-color="#059669"/>
+                                    <stop offset="100%" stop-color="#064e3b"/>
+                                </linearGradient>
+                            </defs>
+                            <circle cx="50" cy="50" r="46" fill="url(#cloverGlow)"/>
+                            <!-- Back Card -->
+                            <rect x="22" y="18" width="34" height="48" rx="4" fill="url(#cardGradL)" stroke="#10b981" stroke-width="1.8" transform="rotate(-14 22 18)"/>
+                            <polygon points="32,32 36,26 40,32 36,38" fill="#10b981" transform="rotate(-14 22 18)"/>
+                            <!-- Front Card -->
+                            <rect x="42" y="16" width="34" height="48" rx="4" fill="url(#cardGradR)" stroke="#34d399" stroke-width="2" transform="rotate(10 42 16)"/>
+                            <polygon points="56,34 61,27 66,34 61,41" fill="#059669" transform="rotate(10 42 16)"/>
+                            <!-- 3D Stacked Casino Chips at Base -->
+                            <ellipse cx="50" cy="74" rx="20" ry="8" fill="url(#chipGrad1)" stroke="#a7f3d0" stroke-width="1.5"/>
+                            <ellipse cx="50" cy="71" rx="16" ry="6" fill="#059669" stroke="#34d399" stroke-width="1"/>
+                            <ellipse cx="50" cy="67" rx="18" ry="7" fill="url(#chipGrad1)" stroke="#a7f3d0" stroke-width="1.5"/>
+                            <ellipse cx="50" cy="64" rx="14" ry="5" fill="#34d399"/>
+                        </svg>
                     </div>
-                    <button class="btn-join-table" data-table="table-rookie">MASAYA GİR</button>
+                    <h3 class="table-name">ACEMİ SALONU</h3>
+                    <div class="table-subtitle">Klasik Vegas Masası - Düşük Risk</div>
+                    <div class="table-limits-pill">
+                        <span class="limits-label">MASA LİMİTİ</span>
+                        <span class="limits-val">$5 - $2,000</span>
+                    </div>
+                    <div class="table-seat-meter">
+                        <div class="seat-pips">
+                            <span class="pip pip-0"></span>
+                            <span class="pip pip-1"></span>
+                            <span class="pip pip-2"></span>
+                        </div>
+                        <span class="seat-val" id="seats-table-rookie">0/3 Koltuk</span>
+                    </div>
+                    <button class="btn-join-table" data-table="table-rookie">
+                        <span>MASAYA OTUR</span>
+                        <span class="btn-arrow">➔</span>
+                    </button>
                 </div>
 
-                <!-- Table 2: Vegas Strip -->
+                <!-- Table 2: Vegas Strip (Sapphire Blue) -->
                 <div class="table-card card-vegas" data-table="table-vegas">
-                    <div class="card-badge vip-badge">POPÜLER</div>
-                    <div class="card-icon">🎰</div>
-                    <h3 class="table-name">Vegas Strip VIP</h3>
-                    <div class="table-limits">Min: <strong>$25</strong> • Max: <strong>$10,000</strong></div>
-                    <div class="table-seat-meter">
-                        <span class="seat-label">Koltuklar:</span>
-                        <span class="seat-val" id="seats-table-vegas">0 / 3</span>
+                    <div class="card-ambient-glow"></div>
+                    <div class="card-badge vip-badge">POPÜLER VIP</div>
+                    <div class="card-crest-wrapper">
+                        <svg class="card-crest-svg" viewBox="0 0 100 100" fill="none">
+                            <defs>
+                                <radialGradient id="blueGlow" cx="50%" cy="50%" r="50%">
+                                    <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.5"/>
+                                    <stop offset="100%" stop-color="#3b82f6" stop-opacity="0"/>
+                                </radialGradient>
+                                <linearGradient id="sapphireTop" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="#bfdbfe"/>
+                                    <stop offset="50%" stop-color="#60a5fa"/>
+                                    <stop offset="100%" stop-color="#2563eb"/>
+                                </linearGradient>
+                                <linearGradient id="sapphireBottom" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="#1d4ed8"/>
+                                    <stop offset="100%" stop-color="#0f172a"/>
+                                </linearGradient>
+                                <linearGradient id="goldCrownGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="#fffbeb"/>
+                                    <stop offset="50%" stop-color="#f59e0b"/>
+                                    <stop offset="100%" stop-color="#b45309"/>
+                                </linearGradient>
+                            </defs>
+                            <circle cx="50" cy="50" r="46" fill="url(#blueGlow)"/>
+                            <!-- 3D Sapphire Facets -->
+                            <polygon points="50,42 74,54 50,86 26,54" fill="url(#sapphireBottom)" stroke="#93c5fd" stroke-width="1.5"/>
+                            <polygon points="50,42 62,54 50,86 38,54" fill="#2563eb" stroke="#bfdbfe" stroke-width="1"/>
+                            <polygon points="34,36 66,36 74,54 26,54" fill="url(#sapphireTop)" stroke="#ffffff" stroke-width="1.5"/>
+                            <polygon points="42,36 58,36 62,54 38,54" fill="#60a5fa" opacity="0.8"/>
+                            <!-- Gold Crown Topping -->
+                            <path d="M36 34 L38 22 L46 29 L50 18 L54 29 L62 22 L64 34 Z" fill="url(#goldCrownGrad)" stroke="#fde047" stroke-width="1.2"/>
+                            <circle cx="50" cy="18" r="2" fill="#ef4444"/>
+                            <circle cx="38" cy="22" r="1.5" fill="#ffffff"/>
+                            <circle cx="62" cy="22" r="1.5" fill="#ffffff"/>
+                        </svg>
                     </div>
-                    <button class="btn-join-table" data-table="table-vegas">MASAYA GİR</button>
+                    <h3 class="table-name">VEGAS STRIP VIP</h3>
+                    <div class="table-subtitle">Nevada Kuralları - Yüksek Kazanç</div>
+                    <div class="table-limits-pill">
+                        <span class="limits-label">MASA LİMİTİ</span>
+                        <span class="limits-val">$25 - $10,000</span>
+                    </div>
+                    <div class="table-seat-meter">
+                        <div class="seat-pips">
+                            <span class="pip pip-0"></span>
+                            <span class="pip pip-1"></span>
+                            <span class="pip pip-2"></span>
+                        </div>
+                        <span class="seat-val" id="seats-table-vegas">0/3 Koltuk</span>
+                    </div>
+                    <button class="btn-join-table" data-table="table-vegas">
+                        <span>MASAYA OTUR</span>
+                        <span class="btn-arrow">➔</span>
+                    </button>
                 </div>
 
-                <!-- Table 3: Monte Carlo -->
+                <!-- Table 3: Monte Carlo (Amethyst Purple) -->
                 <div class="table-card card-montecarlo" data-table="table-montecarlo">
+                    <div class="card-ambient-glow"></div>
                     <div class="card-badge high-badge">HIGH ROLLER</div>
-                    <div class="card-icon">💎</div>
-                    <h3 class="table-name">Monte Carlo Salon</h3>
-                    <div class="table-limits">Min: <strong>$100</strong> • Max: <strong>$25,000</strong></div>
-                    <div class="table-seat-meter">
-                        <span class="seat-label">Koltuklar:</span>
-                        <span class="seat-val" id="seats-table-montecarlo">0 / 3</span>
+                    <div class="card-crest-wrapper">
+                        <svg class="card-crest-svg" viewBox="0 0 100 100" fill="none">
+                            <defs>
+                                <radialGradient id="purpleGlow" cx="50%" cy="50%" r="50%">
+                                    <stop offset="0%" stop-color="#a855f7" stop-opacity="0.5"/>
+                                    <stop offset="100%" stop-color="#a855f7" stop-opacity="0"/>
+                                </radialGradient>
+                                <linearGradient id="amethystTop" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="#f3e8ff"/>
+                                    <stop offset="40%" stop-color="#c084fc"/>
+                                    <stop offset="100%" stop-color="#9333ea"/>
+                                </linearGradient>
+                                <linearGradient id="amethystBottom" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="#7e22ce"/>
+                                    <stop offset="100%" stop-color="#3b0764"/>
+                                </linearGradient>
+                            </defs>
+                            <circle cx="50" cy="50" r="46" fill="url(#purpleGlow)"/>
+                            <!-- 3D Brilliant Cut Gemstone -->
+                            <polygon points="50,22 76,40 50,84 24,40" fill="url(#amethystBottom)" stroke="#e9d5ff" stroke-width="1.8"/>
+                            <polygon points="34,22 66,22 76,40 24,40" fill="url(#amethystTop)" stroke="#ffffff" stroke-width="1.5"/>
+                            <polygon points="42,22 58,22 64,40 36,40" fill="#d8b4fe" opacity="0.85"/>
+                            <polygon points="50,40 64,40 50,84 36,40" fill="#a855f7" stroke="#f3e8ff" stroke-width="1" opacity="0.7"/>
+                            <!-- Specular Highlight Flares -->
+                            <circle cx="34" cy="24" r="2.5" fill="#ffffff" filter="drop-shadow(0 0 3px #fff)"/>
+                            <line x1="50" y1="22" x2="50" y2="84" stroke="#f5d0fe" stroke-width="1" stroke-dasharray="2 2" opacity="0.6"/>
+                        </svg>
                     </div>
-                    <button class="btn-join-table" data-table="table-montecarlo">MASAYA GİR</button>
+                    <h3 class="table-name">MONTE CARLO SALON</h3>
+                    <div class="table-subtitle">Avrupa Tarzı VIP Masalar</div>
+                    <div class="table-limits-pill">
+                        <span class="limits-label">MASA LİMİTİ</span>
+                        <span class="limits-val">$100 - $25,000</span>
+                    </div>
+                    <div class="table-seat-meter">
+                        <div class="seat-pips">
+                            <span class="pip pip-0"></span>
+                            <span class="pip pip-1"></span>
+                            <span class="pip pip-2"></span>
+                        </div>
+                        <span class="seat-val" id="seats-table-montecarlo">0/3 Koltuk</span>
+                    </div>
+                    <button class="btn-join-table" data-table="table-montecarlo">
+                        <span>MASAYA OTUR</span>
+                        <span class="btn-arrow">➔</span>
+                    </button>
                 </div>
 
-                <!-- Table 4: Millionaire Club -->
+                <!-- Table 4: Dinamo High Roller (Imperial 24K Gold) -->
                 <div class="table-card card-millionaire" data-table="table-millionaire">
+                    <div class="card-ambient-glow"></div>
                     <div class="card-badge gold-badge">VIP ROYAL</div>
-                    <div class="card-icon">👑</div>
-                    <h3 class="table-name">Dinamo High Roller</h3>
-                    <div class="table-limits">Min: <strong>$500</strong> • Max: <strong>$100,000</strong></div>
-                    <div class="table-seat-meter">
-                        <span class="seat-label">Koltuklar:</span>
-                        <span class="seat-val" id="seats-table-millionaire">0 / 3</span>
+                    <div class="card-crest-wrapper">
+                        <svg class="card-crest-svg" viewBox="0 0 100 100" fill="none">
+                            <defs>
+                                <radialGradient id="goldAura" cx="50%" cy="50%" r="50%">
+                                    <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.55"/>
+                                    <stop offset="100%" stop-color="#f59e0b" stop-opacity="0"/>
+                                </radialGradient>
+                                <linearGradient id="pureGold3D" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="#fffbeb"/>
+                                    <stop offset="25%" stop-color="#fde047"/>
+                                    <stop offset="60%" stop-color="#f59e0b"/>
+                                    <stop offset="100%" stop-color="#78350f"/>
+                                </linearGradient>
+                            </defs>
+                            <circle cx="50" cy="50" r="46" fill="url(#goldAura)"/>
+                            <!-- 3D Beveled Crown Base -->
+                            <rect x="20" y="66" width="60" height="9" rx="3" fill="#78350f" stroke="#fde047" stroke-width="1.8"/>
+                            <circle cx="32" cy="70.5" r="2" fill="#ef4444"/>
+                            <circle cx="50" cy="70.5" r="2.5" fill="#3b82f6"/>
+                            <circle cx="68" cy="70.5" r="2" fill="#ef4444"/>
+                            <!-- Crown Arches & Spikes -->
+                            <path d="M22 66 C22 46 30 38 30 38 L38 52 L50 28 L62 52 L70 38 C70 38 78 46 78 66 Z" fill="url(#pureGold3D)" stroke="#fff" stroke-width="1.6"/>
+                            <!-- Velvet Cap -->
+                            <path d="M30 66 C30 52 40 44 50 44 C60 44 70 52 70 66 Z" fill="#991b1b" opacity="0.6"/>
+                            <!-- Crown Pearls -->
+                            <circle cx="30" cy="36" r="3" fill="#ffffff" stroke="#fde047" stroke-width="1"/>
+                            <circle cx="50" cy="26" r="4" fill="#ffffff" stroke="#f59e0b" stroke-width="1.2"/>
+                            <circle cx="70" cy="36" r="3" fill="#ffffff" stroke="#fde047" stroke-width="1"/>
+                            <circle cx="50" cy="26" r="1.5" fill="#ef4444"/>
+                        </svg>
                     </div>
-                    <button class="btn-join-table" data-table="table-millionaire">MASAYA GİR</button>
+                    <h3 class="table-name">DİNAMO HIGH ROLLER</h3>
+                    <div class="table-subtitle">Maksimum Bahis - Sınırsız VIP</div>
+                    <div class="table-limits-pill">
+                        <span class="limits-label">MASA LİMİTİ</span>
+                        <span class="limits-val">$500 - $100,000</span>
+                    </div>
+                    <div class="table-seat-meter">
+                        <div class="seat-pips">
+                            <span class="pip pip-0"></span>
+                            <span class="pip pip-1"></span>
+                            <span class="pip pip-2"></span>
+                        </div>
+                        <span class="seat-val" id="seats-table-millionaire">0/3 Koltuk</span>
+                    </div>
+                    <button class="btn-join-table" data-table="table-millionaire">
+                        <span>MASAYA OTUR</span>
+                        <span class="btn-arrow">➔</span>
+                    </button>
                 </div>
 
-                <!-- Table 5: Solo Practice Mode -->
+                <!-- Table 5: Solo Academy (Electric Cyan) -->
                 <div class="table-card card-solo" data-table="table-solo">
-                    <div class="card-badge solo-badge">ANTRENMAN</div>
-                    <div class="card-icon">⚡</div>
-                    <h3 class="table-name">Tek Kişilik Antrenman</h3>
-                    <div class="table-limits">Min: <strong>$5</strong> • Max: <strong>$100,000</strong></div>
-                    <div class="table-seat-meter">
-                        <span class="seat-label">Mod:</span>
-                        <span class="seat-val">Solo / Bot Krupiye</span>
+                    <div class="card-ambient-glow"></div>
+                    <div class="card-badge solo-badge">ANTRENMAN AKADEMİSİ</div>
+                    <div class="card-crest-wrapper">
+                        <svg class="card-crest-svg" viewBox="0 0 100 100" fill="none">
+                            <defs>
+                                <radialGradient id="cyanAura" cx="50%" cy="50%" r="50%">
+                                    <stop offset="0%" stop-color="#06b6d4" stop-opacity="0.5"/>
+                                    <stop offset="100%" stop-color="#06b6d4" stop-opacity="0"/>
+                                </radialGradient>
+                                <linearGradient id="shieldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="#164e63"/>
+                                    <stop offset="60%" stop-color="#0e7490"/>
+                                    <stop offset="100%" stop-color="#083344"/>
+                                </linearGradient>
+                                <linearGradient id="boltGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="#ffffff"/>
+                                    <stop offset="40%" stop-color="#67e8f9"/>
+                                    <stop offset="100%" stop-color="#06b6d4"/>
+                                </linearGradient>
+                            </defs>
+                            <circle cx="50" cy="50" r="46" fill="url(#cyanAura)"/>
+                            <!-- 3D Beveled Knight Shield -->
+                            <path d="M50 18 L76 26 C76 56 50 82 50 82 C50 82 24 56 24 26 Z" fill="url(#shieldGrad)" stroke="#22d3ee" stroke-width="2.2"/>
+                            <path d="M50 24 L70 30 C70 54 50 74 50 74 C50 74 30 54 30 30 Z" fill="#082f49" stroke="#67e8f9" stroke-width="1.2"/>
+                            <!-- Electric Lightning Bolt -->
+                            <path d="M54 28 L38 50 L48 50 L44 72 L64 44 L52 44 Z" fill="url(#boltGrad)" stroke="#cffafe" stroke-width="1.5" filter="drop-shadow(0 0 6px #22d3ee)"/>
+                        </svg>
                     </div>
-                    <button class="btn-join-table btn-join-solo" data-table="table-solo">TEK OYNA</button>
+                    <h3 class="table-name">TEK KİŞİLİK ANTRENMAN</h3>
+                    <div class="table-subtitle">Bot Krupiye - Canlı Strateji Koçu</div>
+                    <div class="table-limits-pill">
+                        <span class="limits-label">MASA LİMİTİ</span>
+                        <span class="limits-val">$5 - $100,000</span>
+                    </div>
+                    <div class="table-seat-meter">
+                        <div class="seat-pips">
+                            <span class="pip pip-active"></span>
+                        </div>
+                        <span class="seat-val">Solo Özel Masa</span>
+                    </div>
+                    <button class="btn-join-table btn-join-solo" data-table="table-solo">
+                        <span>TEK BAŞINA OYNA</span>
+                        <span class="btn-arrow">➔</span>
+                    </button>
                 </div>
 
             </div>
-        </main>
+
+            </main>
     </div>
 
     <!-- ======================================================================
@@ -153,7 +386,6 @@
             <div class="header-left">
                 <!-- Back to Lobby Button -->
                 <button id="btn-back-lobby" class="btn-back-lobby" title="Lobiye Dön">
-                    <span class="arrow">⬅️</span>
                     <span class="label">LOBİ</span>
                 </button>
 
@@ -190,6 +422,11 @@
                     <div id="current-bet-val" class="pill-value cyan-glow">$0</div>
                 </div>
 
+                <div class="hud-pill win-pill">
+                    <div class="pill-label">SON KAZANÇ</div>
+                    <div id="last-win-val" class="pill-value green-glow">$0</div>
+                </div>
+
                 <button id="btn-refill-bankroll" class="btn-refill hidden" title="Kasa tükendiğinde tıkla">
                     + $2,500 AL
                 </button>
@@ -204,7 +441,6 @@
 
                 <!-- Strategy Coach Toggle -->
                 <button id="btn-toggle-coach" class="btn-icon-pill active" title="Matematiksel Strateji Koçu">
-                    <span class="icon">🧠</span>
                     <span class="label">KOÇ MODU</span>
                 </button>
 
@@ -235,12 +471,16 @@
                 <div class="table-cushion-border">
                     <div class="table-felt">
                         
-                        <!-- Felt Table Graphic Markings -->
+                        <!-- Felt Table Graphic Markings & Casino Arc Structure -->
                         <div class="felt-markings">
+                            <!-- Casino Outer & Inner Sweeping Arc Lines -->
+                            <div class="casino-felt-arc-double"></div>
+
+                            <!-- Table Center Rules Banner (Positioned Below Dealer Cards) -->
                             <div class="felt-rules-arc">
                                 <div class="felt-rule-line primary-gold">★ BLACKJACK 3'E 2 ÖDER ★</div>
-                                <div class="felt-rule-line secondary-silver">KRUPİYE 16'DA KART ÇEKER • 17'DE DURUR</div>
                                 <div class="felt-rule-line insurance-line">SİGORTA (INSURANCE) 2'YE 1 ÖDER</div>
+                                <div class="felt-rule-line secondary-silver">KRUPİYE 16'DA KART ÇEKER • 17'DE DURUR</div>
                             </div>
 
                             <div class="felt-center-brand">
@@ -249,15 +489,19 @@
                                 <div class="felt-brand-sub">LAS VEGAS RULES • VIP SALON</div>
                             </div>
 
+                            <!-- Acrylic Discard Rack (Top-Left Corner) -->
                             <div class="visual-discard-spot" title="Atık Kart Kutusu">
                                 <div class="discard-tray-box">
+                                    <div class="acrylic-tray-lid"></div>
                                     <div class="discard-cards-stack"></div>
                                     <span class="shoe-text">ATIK KARTLAR</span>
                                 </div>
                             </div>
 
-                            <div class="visual-shoe-spot" title="Deste Dağıtım Kutusu">
+                            <!-- Acrylic Dealing Shoe (Top-Right Corner) -->
+                            <div id="table-visual-shoe" class="visual-shoe-spot" title="Deste Dağıtım Kutusu (Shoe)">
                                 <div class="shoe-visual-box">
+                                    <div class="acrylic-shoe-wedge"></div>
                                     <div class="shoe-cards-back"></div>
                                     <span class="shoe-text">6 DESTE SHOE</span>
                                 </div>
@@ -266,12 +510,46 @@
 
                         <!-- Dealer Play Area -->
                         <section class="dealer-section">
+                            <!-- 3D Metallic Dealer Chip Tray / Rack (Flush with top yellow felt rim) -->
+                            <div class="dealer-chip-rack" title="Krupiye Çip Tablası">
+                                <div class="chip-rack-tray">
+                                    <div class="rack-slot slot-gold">
+                                        <span class="mini-chip mc-gold"></span><span class="mini-chip mc-gold"></span><span class="mini-chip mc-gold"></span><span class="mini-chip mc-gold"></span>
+                                    </div>
+                                    <div class="rack-slot slot-black">
+                                        <span class="mini-chip mc-black"></span><span class="mini-chip mc-black"></span><span class="mini-chip mc-black"></span><span class="mini-chip mc-black"></span>
+                                    </div>
+                                    <div class="rack-slot slot-purple">
+                                        <span class="mini-chip mc-purple"></span><span class="mini-chip mc-purple"></span><span class="mini-chip mc-purple"></span><span class="mini-chip mc-purple"></span>
+                                    </div>
+                                    <div class="rack-slot slot-red">
+                                        <span class="mini-chip mc-red"></span><span class="mini-chip mc-red"></span><span class="mini-chip mc-red"></span><span class="mini-chip mc-red"></span>
+                                    </div>
+                                    <div class="rack-slot slot-green">
+                                        <span class="mini-chip mc-green"></span><span class="mini-chip mc-green"></span><span class="mini-chip mc-green"></span><span class="mini-chip mc-green"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Dealer Role & Score Row -->
                             <div class="dealer-header-row">
                                 <div class="role-badge-box">
                                     <span class="role-badge">KRUPİYE</span>
                                 </div>
                                 <div id="dealer-score-badge" class="score-badge hidden">0</div>
                             </div>
+
+                            <!-- Animated VIP Dealer Arms & Hands (Left & Right Flanking Arms) -->
+                            <div id="dealer-croupier-arms" class="dealer-croupier-arms">
+                                <div class="croupier-arm arm-left">
+                                    <img src="assets/dealer_hand_left.png" alt="Krupiye Sol Kol" class="croupier-img">
+                                </div>
+                                <div class="croupier-arm arm-right">
+                                    <img src="assets/dealer_hand_right.png" alt="Krupiye Sağ Kol" class="croupier-img">
+                                </div>
+                            </div>
+
+                            <!-- Dealer Card Zone -->
                             <div class="dealer-card-zone">
                                 <div id="dealer-cards" class="cards-holder dealer-cards-holder"></div>
                             </div>
@@ -287,6 +565,11 @@
                                     <div class="seat-cards"></div>
                                 </div>
                                 <div class="seat-betting-spot">
+                                    <div class="bet-spot-graphic">
+                                        <div class="bet-spot-ring">
+                                            <span class="bet-spot-word">BAHİS</span>
+                                        </div>
+                                    </div>
                                     <div class="seat-chip-stack"></div>
                                     <span class="seat-bet-val">$0</span>
                                 </div>
@@ -297,8 +580,12 @@
                                         <span class="seat-chips">$0</span>
                                     </div>
                                 </div>
-                                <button class="btn-take-seat" data-seat="0">
-                                    <span class="seat-icon">🪑</span>
+                                <button class="btn-take-seat" data-seat="0" title="Bu Koltuğa Otur">
+                                    <svg class="seat-chair-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M7 11V6a3 3 0 0 1 6 0v5"/>
+                                        <rect x="4" y="11" width="16" height="5" rx="2"/>
+                                        <path d="M6 16v5M18 16v5"/>
+                                    </svg>
                                     <span>OTUR</span>
                                 </button>
                             </div>
@@ -310,6 +597,11 @@
                                     <div class="seat-cards"></div>
                                 </div>
                                 <div class="seat-betting-spot">
+                                    <div class="bet-spot-graphic">
+                                        <div class="bet-spot-ring">
+                                            <span class="bet-spot-word">BAHİS</span>
+                                        </div>
+                                    </div>
                                     <div class="seat-chip-stack"></div>
                                     <span class="seat-bet-val">$0</span>
                                 </div>
@@ -320,8 +612,12 @@
                                         <span class="seat-chips">$0</span>
                                     </div>
                                 </div>
-                                <button class="btn-take-seat" data-seat="1">
-                                    <span class="seat-icon">🪑</span>
+                                <button class="btn-take-seat" data-seat="1" title="Bu Koltuğa Otur">
+                                    <svg class="seat-chair-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M7 11V6a3 3 0 0 1 6 0v5"/>
+                                        <rect x="4" y="11" width="16" height="5" rx="2"/>
+                                        <path d="M6 16v5M18 16v5"/>
+                                    </svg>
                                     <span>OTUR</span>
                                 </button>
                             </div>
@@ -333,6 +629,11 @@
                                     <div class="seat-cards"></div>
                                 </div>
                                 <div class="seat-betting-spot">
+                                    <div class="bet-spot-graphic">
+                                        <div class="bet-spot-ring">
+                                            <span class="bet-spot-word">BAHİS</span>
+                                        </div>
+                                    </div>
                                     <div class="seat-chip-stack"></div>
                                     <span class="seat-bet-val">$0</span>
                                 </div>
@@ -343,8 +644,12 @@
                                         <span class="seat-chips">$0</span>
                                     </div>
                                 </div>
-                                <button class="btn-take-seat" data-seat="2">
-                                    <span class="seat-icon">🪑</span>
+                                <button class="btn-take-seat" data-seat="2" title="Bu Koltuğa Otur">
+                                    <svg class="seat-chair-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M7 11V6a3 3 0 0 1 6 0v5"/>
+                                        <rect x="4" y="11" width="16" height="5" rx="2"/>
+                                        <path d="M6 16v5M18 16v5"/>
+                                    </svg>
                                     <span>OTUR</span>
                                 </button>
                             </div>
@@ -419,60 +724,88 @@
 
             <!-- Multi-Turn Notice / Status Banner -->
             <div id="multiplayer-status-bar" class="mp-status-bar hidden">
-                <span id="mp-status-msg" class="mp-status-text">Bahisler kapanıyor: 10s</span>
+                <span id="mp-status-msg" class="mp-status-text">Oyuncu bekleniyor... Oynamak için masada boş bir koltuğa oturun!</span>
             </div>
 
-            <!-- Action Buttons (Shown during Player Turn) -->
-            <div id="action-controls" class="action-dock hidden">
-                <button id="btn-hit" class="btn-action btn-action-hit">
-                    <span class="btn-action-hotkey">H</span>
-                    <span class="btn-action-title">KART ÇEK</span>
-                    <span class="btn-action-sub">HIT</span>
-                </button>
+            <!-- Action Cockpit Console Deck (Lüks VIP Masaüstü Kontrol Konsolu) -->
+            <div id="action-controls" class="action-dock action-cockpit-deck hidden">
+                <div class="cockpit-header-strip">
+                    <div class="cockpit-pulse-dot"></div>
+                    <span id="cockpit-turn-title" class="cockpit-turn-text">SIRA SİZDE</span>
+                    <span id="cockpit-timer-badge" class="cockpit-timer-pill">15s</span>
+                </div>
 
-                <button id="btn-stand" class="btn-action btn-action-stand">
-                    <span class="btn-action-hotkey">S</span>
-                    <span class="btn-action-title">KAL</span>
-                    <span class="btn-action-sub">STAND</span>
-                </button>
+                <div class="cockpit-buttons-row">
+                    <div class="action-btn-item">
+                        <button id="btn-hit" class="btn-action-circle btn-action-hit" title="Kart Çek (H)">
+                            <span class="btn-action-icon">+</span>
+                            <span class="btn-action-hotkey">H</span>
+                        </button>
+                        <span class="btn-action-label label-hit">KART ÇEK</span>
+                    </div>
 
-                <button id="btn-double" class="btn-action btn-action-double">
-                    <span class="btn-action-hotkey">D</span>
-                    <span class="btn-action-title">İKİYE KATLA</span>
-                    <span class="btn-action-sub">DOUBLE</span>
-                </button>
+                    <div class="action-btn-item">
+                        <button id="btn-stand" class="btn-action-circle btn-action-stand" title="Dur (S)">
+                            <span class="btn-action-icon">■</span>
+                            <span class="btn-action-hotkey">S</span>
+                        </button>
+                        <span class="btn-action-label label-stand">DUR</span>
+                    </div>
 
-                <button id="btn-split" class="btn-action btn-action-split">
-                    <span class="btn-action-hotkey">P</span>
-                    <span class="btn-action-title">BÖL</span>
-                    <span class="btn-action-sub">SPLIT</span>
-                </button>
+                    <div class="action-btn-item">
+                        <button id="btn-double" class="btn-action-circle btn-action-double" title="İkiye Katla (D)">
+                            <span class="btn-action-icon">2x</span>
+                            <span class="btn-action-hotkey">D</span>
+                        </button>
+                        <span class="btn-action-label label-double">İKİYE KATLA</span>
+                    </div>
 
-                <button id="btn-surrender" class="btn-action btn-action-surrender">
-                    <span class="btn-action-hotkey">R</span>
-                    <span class="btn-action-title">TESLİM OL</span>
-                    <span class="btn-action-sub">SURRENDER</span>
-                </button>
+                    <div class="action-btn-item">
+                        <button id="btn-split" class="btn-action-circle btn-action-split" title="Böl (P)">
+                            <span class="btn-action-icon">⑂</span>
+                            <span class="btn-action-hotkey">P</span>
+                        </button>
+                        <span class="btn-action-label label-split">BÖL</span>
+                    </div>
+
+                    <div class="action-btn-item">
+                        <button id="btn-surrender" class="btn-action-circle btn-action-surrender" title="Pes Et (R)">
+                            <span class="btn-action-icon">🏳</span>
+                            <span class="btn-action-hotkey">R</span>
+                        </button>
+                        <span class="btn-action-label label-surrender">PES ET</span>
+                    </div>
+                </div>
             </div>
 
             <!-- Betting Console (Shown before Deal) -->
             <div id="betting-controls" class="betting-console-dock">
                 
+                <!-- Floating Quick Bet Stepper Pill (Reference Mockup) -->
+                <div class="bet-quick-pill" id="quick-bet-bar">
+                    <div class="bet-pill-tag">
+                        <span class="chip-dash-icon"></span>
+                        <span>BAHİS</span>
+                    </div>
+                    <div class="bet-pill-stepper">
+                        <button id="btn-bet-minus" class="stepper-btn" title="Bahsi azalt">−</button>
+                        <span id="quick-bet-amount" class="stepper-val">$25</span>
+                        <button id="btn-bet-plus" class="stepper-btn" title="Bahsi artır">+</button>
+                    </div>
+                    <button id="btn-open-quick-bet" class="btn-bet-modal-open" title="Hızlı Bahis Seçimi">HIZLI SEÇ</button>
+                </div>
+
                 <div class="bet-utility-buttons">
                     <button id="btn-clear" class="btn-util" title="Mevcut bahsi temizle (C)">
-                        <span class="util-icon">🗑️</span>
                         <span>TEMİZLE</span>
                     </button>
                     <button id="btn-double-bet" class="btn-util" title="Bahsi 2 katına çıkar (D)">
-                        <span class="util-icon">✖️2</span>
                         <span>2X BAHİS</span>
                     </button>
                     <button id="btn-rebet" class="btn-util" title="Önceki bahsi tekrar koy (R)">
-                        <span class="util-icon">🔄</span>
                         <span>TEKRAR</span>
                     </button>
                     <button id="btn-all-in" class="btn-util btn-allin" title="Tüm bakiyeyi bas">
-                        <span class="util-icon">🔥</span>
                         <span>ALL-IN</span>
                     </button>
                 </div>
@@ -531,7 +864,7 @@
                     <button id="tab-btn-login" class="auth-tab active">GİRİŞ YAP</button>
                     <button id="tab-btn-register" class="auth-tab">YENİ HESAP AÇ</button>
                 </div>
-                <button class="modal-close">&times;</button>
+                <button class="modal-close-icon" id="btn-auth-close-corner" title="Kapat">&times;</button>
             </div>
 
             <!-- Login Form -->
@@ -575,14 +908,6 @@
                 <div id="reg-error" class="form-error hidden"></div>
                 <button type="submit" class="btn-modal-primary btn-block">HESAP OLUŞTUR & BAŞLA</button>
             </form>
-
-            <div class="auth-footer-divider">
-                <span>VEYA</span>
-            </div>
-
-            <button id="btn-guest-login" class="btn-guest-quick">
-                <span>👤 MİSAFİR OLARAK HIZLI OYNA</span>
-            </button>
         </div>
     </div>
 
@@ -591,7 +916,7 @@
         <div class="modal-card profile-card">
             <div class="modal-header">
                 <h3>OYUNCU PROFİLİ</h3>
-                <button class="modal-close">&times;</button>
+                <button class="modal-close-icon" title="Kapat">&times;</button>
             </div>
             <div class="profile-summary-header">
                 <div id="profile-big-avatar" class="profile-big-avatar">👑</div>
@@ -630,6 +955,7 @@
 
             <div class="profile-modal-actions">
                 <button id="btn-logout" class="btn-modal-secondary">ÇIKIŞ YAP</button>
+                <button type="button" class="btn-modal-action-close">KAPAT</button>
             </div>
         </div>
     </div>
@@ -638,8 +964,8 @@
     <div id="leaderboard-modal" class="modal-overlay hidden">
         <div class="modal-card modal-wide">
             <div class="modal-header">
-                <h3>🏆 DİNAMO CASINO EN ZENGİNLER (TOP 10)</h3>
-                <button class="modal-close">&times;</button>
+                <h3>🏆 DİNAMO CASINO EN İYİLER (TOP 10)</h3>
+                <button class="modal-close-icon" title="Kapat">&times;</button>
             </div>
             <div class="modal-scroll-content">
                 <table class="leaderboard-table">
@@ -647,8 +973,8 @@
                         <tr>
                             <th>Sıra</th>
                             <th>Oyuncu</th>
-                            <th>Kasa Çipleri</th>
                             <th>Galibiyet</th>
+                            <th>Toplam Kazanç</th>
                             <th>En Büyük Kazanç</th>
                         </tr>
                     </thead>
@@ -657,18 +983,83 @@
                     </tbody>
                 </table>
             </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-modal-action-close">KAPAT</button>
+            </div>
         </div>
     </div>
 
-    <!-- Round Message Overlay Banner -->
+    <!-- Round Message Overlay Banner (Lüks Kazanç & Sonuç Ekranı - Referans Tasarımı) -->
     <div id="round-message-banner" class="round-overlay hidden">
-        <div class="banner-card">
-            <h2 id="round-banner-title" class="banner-title gold">⚡ DINAMO BLACKJACK! ⚡</h2>
-            <p id="round-banner-sub" class="banner-sub">Tebrikler! Toplam kazanç: +$250</p>
-            <button id="btn-next-round" class="btn-next-hand">
-                <span>YENİ EL BAŞLAT</span>
-                <span class="hotkey-sub">[ BOŞLUK ]</span>
-            </button>
+        <div class="banner-card win-screen-card">
+            <div class="win-card-header">
+                <span class="win-brand-spade">♠</span>
+                <span class="win-brand-title">DINAMO BLACKJACK</span>
+            </div>
+            
+            <h2 id="round-banner-title" class="banner-title green">KAZANDINIZ!</h2>
+            <p id="round-banner-sub" class="banner-sub">Ödül: <strong id="win-reward-amt" class="gold-text">+$100</strong></p>
+
+            <!-- Cards Comparison Showcase (VS Kutusu - Krupiye vs Oyuncu) -->
+            <div id="round-cards-comparison" class="round-comparison-box">
+                <div class="comparison-side dealer-side">
+                    <div id="win-dealer-cards" class="comparison-cards"></div>
+                    <span id="win-dealer-badge" class="comparison-badge dealer-badge">17 DEALER</span>
+                </div>
+                <div class="comparison-vs">VS</div>
+                <div class="comparison-side player-side">
+                    <div id="win-player-cards" class="comparison-cards"></div>
+                    <span id="win-player-badge" class="comparison-badge player-badge">21 SEN</span>
+                </div>
+            </div>
+
+            <div class="win-actions-row">
+                <button id="btn-next-round" class="btn-modal-primary btn-next-hand">
+                    <span>TEKRAR OYNA</span>
+                    <span class="hotkey-sub">[ BOŞLUK ]</span>
+                </button>
+                <button id="btn-banner-lobby" class="btn-modal-secondary">
+                    <span>LOBİYE DÖN</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Bet Selection Modal (Hızlı Bahis Seçimi Modalı - Referans Tasarımı) -->
+    <div id="quick-bet-modal" class="modal-overlay hidden">
+        <div class="modal-card quick-bet-card">
+            <div class="modal-header">
+                <div class="quick-bet-title-box">
+                    <span class="spade-icon-mini">♠</span>
+                    <h3>BAHİS SEÇİN</h3>
+                </div>
+                <button class="modal-close-icon" id="btn-quick-bet-close" title="Kapat">&times;</button>
+            </div>
+            
+            <div class="quick-bet-content">
+                <div class="quick-chips-grid">
+                    <button class="quick-chip-btn" data-amt="10">$10</button>
+                    <button class="quick-chip-btn" data-amt="25">$25</button>
+                    <button class="quick-chip-btn active" data-amt="50">$50</button>
+                    <button class="quick-chip-btn" data-amt="100">$100</button>
+                    <button class="quick-chip-btn" data-amt="250">$250</button>
+                    <button class="quick-chip-btn" data-amt="500">$500</button>
+                    <button class="quick-chip-btn" data-amt="1000">$1,000</button>
+                    <button class="quick-chip-btn" data-amt="5000">$5,000</button>
+                </div>
+
+                <div class="custom-bet-group">
+                    <label for="custom-bet-input">Özel Tutar</label>
+                    <div class="custom-bet-input-wrap">
+                        <span class="input-currency">$</span>
+                        <input type="number" id="custom-bet-input" placeholder="Tutar girin..." min="5" step="5">
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer quick-bet-footer">
+                <button id="btn-confirm-quick-bet" class="btn-modal-primary btn-block">ONAYLA</button>
+            </div>
         </div>
     </div>
 
@@ -694,7 +1085,7 @@
         <div class="modal-card modal-wide">
             <div class="modal-header">
                 <h3>VEGAS TEMEL STRATEJİ TABLOSU (BASIC STRATEGY)</h3>
-                <button class="modal-close">&times;</button>
+                <button class="modal-close-icon" title="Kapat">&times;</button>
             </div>
             <div class="modal-scroll-content">
                 <p class="strategy-intro">
@@ -725,6 +1116,9 @@
                     </table>
                 </div>
             </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-modal-action-close">KAPAT</button>
+            </div>
         </div>
     </div>
 
@@ -733,7 +1127,7 @@
         <div class="modal-card modal-wide">
             <div class="modal-header">
                 <h3>DINAMO BLACKJACK KURALLARI</h3>
-                <button class="modal-close">&times;</button>
+                <button class="modal-close-icon" title="Kapat">&times;</button>
             </div>
             <div class="modal-scroll-content rules-body">
                 <h4>🎯 Temel Amaç</h4>
@@ -746,6 +1140,9 @@
                     <li><strong>Sigorta:</strong> 2'ye 1 öder.</li>
                 </ul>
             </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-modal-action-close">KAPAT</button>
+            </div>
         </div>
     </div>
 
@@ -754,7 +1151,7 @@
         <div class="modal-card">
             <div class="modal-header">
                 <h3>AYARLAR & GÖRÜNÜM</h3>
-                <button class="modal-close">&times;</button>
+                <button class="modal-close-icon" title="Kapat">&times;</button>
             </div>
             <div class="settings-form">
                 <div class="setting-row">
@@ -773,6 +1170,9 @@
                         <option value="fast">Hızlı (Seri Oyun)</option>
                     </select>
                 </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-modal-action-close">KAYDET & KAPAT</button>
             </div>
         </div>
     </div>

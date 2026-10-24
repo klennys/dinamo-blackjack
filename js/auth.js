@@ -16,6 +16,9 @@ class AuthManager {
         this.token = localStorage.getItem('dinamo_token') || null;
         this.user = this.loadLocalUser();
         this.listeners = [];
+        if (this.token && this.user) {
+            this.refreshProfile();
+        }
     }
 
     subscribe(fn) {
@@ -32,7 +35,14 @@ class AuthManager {
         const saved = localStorage.getItem('dinamo_user');
         if (saved) {
             try {
-                return JSON.parse(saved);
+                const u = JSON.parse(saved);
+                // Disallow old guest accounts
+                if (u && u.username && u.username.toLowerCase().startsWith('misafir_')) {
+                    localStorage.removeItem('dinamo_user');
+                    localStorage.removeItem('dinamo_token');
+                    return null;
+                }
+                return u;
             } catch (e) {
                 return null;
             }
@@ -75,7 +85,7 @@ class AuthManager {
     }
 
     isLoggedIn() {
-        return !!this.user;
+        return !!this.user && !this.user.username.toLowerCase().startsWith('misafir_');
     }
 
     async register(username, password, avatar) {
@@ -172,28 +182,14 @@ class AuthManager {
         }
     }
 
-    loginAsGuest() {
-        const guestUser = {
-            id: 999999,
-            username: 'Misafir_' + Math.floor(Math.random() * 900 + 100),
-            avatar: 'avatar-vip-1',
-            chips: 2500,
-            vip_level: 1,
-            hands_played: 0,
-            wins: 0,
-            blackjacks: 0,
-            biggest_win: 0
-        };
-        this.saveSession('guest-token', guestUser);
-        return guestUser;
-    }
-
     async refreshProfile() {
-        if (!this.token || this.token.startsWith('guest-') || this.token.startsWith('local-')) return this.user;
+        if (!this.token) return this.user;
         try {
-            const res = await fetch(`${this.apiBase}/api/me`, {
-                headers: { 'Authorization': `Bearer ${this.token}` }
-            });
+            const headers = { 'Authorization': `Bearer ${this.token}` };
+            if (this.user && this.user.username) {
+                headers['X-Username'] = this.user.username;
+            }
+            const res = await fetch(`${this.apiBase}/api/me`, { headers });
             const data = await res.json();
             if (data.success) {
                 this.user = data.user;
@@ -208,9 +204,9 @@ class AuthManager {
     }
 
     async claimDailyBonus() {
-        if (!this.token || this.token.startsWith('guest-') || this.token.startsWith('local-')) {
-            // Local bonus
-            this.user.chips += 2500;
+        if (!this.token || this.token.startsWith('local-')) {
+            // Local bonus fallback
+            this.user.chips += 1000;
             localStorage.setItem('dinamo_user', JSON.stringify(this.user));
             if (this.user.username) {
                 const accs = this.getLocalAccounts();

@@ -40,10 +40,12 @@ class MultiplayerClient {
             this.ws.onopen = () => {
                 this.isConnected = true;
                 const token = window.authManager.token;
+                const me = window.authManager.user;
                 this.send({
                     action: 'JOIN_TABLE',
                     tableId: tableId,
-                    token: token
+                    token: token,
+                    username: me ? me.username : null
                 });
                 this.notify('CONNECTED', { tableId });
             };
@@ -99,24 +101,40 @@ class MultiplayerClient {
         this.mySeatIndex = null;
     }
 
-    placeBet(amount) {
-        this.send({ action: 'PLACE_BET', amount });
+    placeBet(amount, seatIndex = null) {
+        this.send({ action: 'PLACE_BET', amount, seatIndex });
     }
 
-    clearBet() {
-        this.send({ action: 'CLEAR_BET' });
+    clearBet(seatIndex = null) {
+        this.send({ action: 'CLEAR_BET', seatIndex });
     }
 
-    hit() {
-        this.send({ action: 'HIT' });
+    hit(seatIndex = null) {
+        this.send({ action: 'HIT', seatIndex: seatIndex ?? this.selectedActiveSeat ?? this.tableState?.activeTurnSeat });
     }
 
-    stand() {
-        this.send({ action: 'STAND' });
+    stand(seatIndex = null) {
+        this.send({ action: 'STAND', seatIndex: seatIndex ?? this.selectedActiveSeat ?? this.tableState?.activeTurnSeat });
     }
 
-    doubleDown() {
-        this.send({ action: 'DOUBLE' });
+    nextRound() {
+        this.send({ action: 'NEXT_ROUND' });
+    }
+
+    doubleDown(seatIndex = null) {
+        this.send({ action: 'DOUBLE', seatIndex: seatIndex ?? this.selectedActiveSeat ?? this.tableState?.activeTurnSeat });
+    }
+
+    split(seatIndex = null) {
+        this.send({ action: 'SPLIT', seatIndex: seatIndex ?? this.selectedActiveSeat ?? this.tableState?.activeTurnSeat });
+    }
+
+    surrender(seatIndex = null) {
+        this.send({ action: 'SURRENDER', seatIndex: seatIndex ?? this.selectedActiveSeat ?? this.tableState?.activeTurnSeat });
+    }
+
+    selectActiveSeat(seatIndex) {
+        this.send({ action: 'SELECT_ACTIVE_SEAT', seatIndex });
     }
 
     sendChat(text) {
@@ -128,11 +146,16 @@ class MultiplayerClient {
         switch (msg.type) {
             case 'TABLE_STATE':
                 this.tableState = msg;
-                // Identify which seat belongs to current user
+                // Identify all seats belonging to current user (Multi-seat play)
                 const me = window.authManager.user;
+                this.mySeatIndices = [];
                 if (me && msg.seats) {
-                    const mySeat = msg.seats.findIndex(s => s && s.username === me.username);
-                    this.mySeatIndex = mySeat !== -1 ? mySeat : null;
+                    msg.seats.forEach((s, idx) => {
+                        if (s && s.username === me.username) {
+                            this.mySeatIndices.push(idx);
+                        }
+                    });
+                    this.mySeatIndex = this.mySeatIndices.length > 0 ? this.mySeatIndices[0] : null;
                 }
                 this.notify('TABLE_STATE_UPDATE', msg);
                 break;
@@ -142,10 +165,25 @@ class MultiplayerClient {
                 break;
 
             case 'CARD_DEALT':
+                if (this.tableState) {
+                    if (msg.target === 'seat' && this.tableState.seats && this.tableState.seats[msg.seatIndex]) {
+                        const s = this.tableState.seats[msg.seatIndex];
+                        if (!s.cards) s.cards = [];
+                        s.cards.push(msg.card);
+                        if (msg.calc) s.calc = msg.calc;
+                    } else if (msg.target === 'dealer') {
+                        if (!this.tableState.dealerCards) this.tableState.dealerCards = [];
+                        this.tableState.dealerCards.push(msg.card);
+                    }
+                }
                 this.notify('CARD_DEALT', msg);
                 break;
 
             case 'PLAYER_TURN_START':
+                if (this.tableState) {
+                    this.tableState.activeTurnSeat = msg.seatIndex;
+                }
+                this.selectedActiveSeat = msg.seatIndex;
                 this.notify('PLAYER_TURN_START', msg);
                 break;
 
@@ -166,7 +204,75 @@ class MultiplayerClient {
                 break;
 
             case 'PLAYER_DOUBLED':
+                if (this.tableState && this.tableState.seats && this.tableState.seats[msg.seatIndex]) {
+                    const s = this.tableState.seats[msg.seatIndex];
+                    s.bet = msg.newBet;
+                    if (!s.cards) s.cards = [];
+                    if (msg.card) s.cards.push(msg.card);
+                    if (msg.calc) s.calc = msg.calc;
+                }
                 this.notify('PLAYER_DOUBLED', msg);
+                break;
+
+            case 'PLAYER_SPLIT':
+                if (this.tableState && this.tableState.seats && this.tableState.seats[msg.seatIndex]) {
+                    const s = this.tableState.seats[msg.seatIndex];
+                    s.isSplit = true;
+                    s.splitHands = msg.hands;
+                    s.activeHandIdx = msg.activeHandIdx;
+                }
+                this.notify('PLAYER_SPLIT', msg);
+                break;
+
+            case 'SPLIT_HAND_UPDATED':
+                if (this.tableState && this.tableState.seats && this.tableState.seats[msg.seatIndex]) {
+                    const s = this.tableState.seats[msg.seatIndex];
+                    if (s.splitHands && s.splitHands[msg.handIndex]) {
+                        s.splitHands[msg.handIndex].cards.push(msg.card);
+                        s.splitHands[msg.handIndex].calc = msg.calc;
+                        s.splitHands[msg.handIndex].isDone = msg.isDone;
+                    }
+                    s.activeHandIdx = msg.activeHandIdx;
+                }
+                this.notify('SPLIT_HAND_UPDATED', msg);
+                break;
+
+            case 'SPLIT_HAND_STAND':
+                if (this.tableState && this.tableState.seats && this.tableState.seats[msg.seatIndex]) {
+                    const s = this.tableState.seats[msg.seatIndex];
+                    if (s.splitHands && s.splitHands[msg.handIndex]) {
+                        s.splitHands[msg.handIndex].isDone = true;
+                    }
+                    s.activeHandIdx = msg.nextHandIndex;
+                }
+                this.notify('SPLIT_HAND_STAND', msg);
+                break;
+
+            case 'SPLIT_HAND_DOUBLED':
+                if (this.tableState && this.tableState.seats && this.tableState.seats[msg.seatIndex]) {
+                    const s = this.tableState.seats[msg.seatIndex];
+                    if (s.splitHands && s.splitHands[msg.handIndex]) {
+                        s.splitHands[msg.handIndex].cards.push(msg.card);
+                        s.splitHands[msg.handIndex].calc = msg.calc;
+                        s.splitHands[msg.handIndex].bet = msg.newBet;
+                        s.splitHands[msg.handIndex].isDone = true;
+                    }
+                    s.activeHandIdx = msg.activeHandIdx;
+                }
+                this.notify('SPLIT_HAND_DOUBLED', msg);
+                break;
+
+            case 'PLAYER_SURRENDERED':
+                if (this.tableState && this.tableState.seats && this.tableState.seats[msg.seatIndex]) {
+                    const s = this.tableState.seats[msg.seatIndex];
+                    s.isSurrendered = true;
+                    s.bet = 0;
+                }
+                this.notify('PLAYER_SURRENDERED', msg);
+                break;
+
+            case 'TOAST':
+                this.notify('TOAST', msg);
                 break;
 
             case 'ROUND_FINISHED':

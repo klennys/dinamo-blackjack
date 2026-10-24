@@ -79,7 +79,7 @@ const StrategyEngine = {
                     return {
                         action: 'split',
                         code: 'P',
-                        title: 'BÖL (SPLIT)',
+                        title: 'BÖL',
                         advice: `${hand.cards[0].rank}-${hand.cards[1].rank} çiftini krupiyenin ${dealerUpCard.rank} kartına karşı bölmek matematiksel olarak en karlı hamledir.`
                     };
                 }
@@ -100,21 +100,21 @@ const StrategyEngine = {
                     return {
                         action: canDouble ? 'double' : (action === 'Ds' ? 'stand' : 'hit'),
                         code: action,
-                        title: canDouble ? 'İKİYE KATLA (DOUBLE)' : (action === 'Ds' ? 'KAL (STAND)' : 'KART ÇEK (HIT)'),
+                        title: canDouble ? 'İKİYE KATLA' : (action === 'Ds' ? 'DUR' : 'KART ÇEK'),
                         advice: `Soft ${total} eli krupiyenin ${dealerUpCard.rank} kartına karşı ${canDouble ? 'ikiye katlamak' : 'avantajlı'} en iyi karardır.`
                     };
                 } else if (action === 'S') {
                     return {
                         action: 'stand',
                         code: 'S',
-                        title: 'KAL (STAND)',
+                        title: 'DUR',
                         advice: `Soft ${total} yeterince güçlüdür, krupiyenin patlama ihtimaline karşı elde kalın.`
                     };
                 } else {
                     return {
                         action: 'hit',
                         code: 'H',
-                        title: 'KART ÇEK (HIT)',
+                        title: 'KART ÇEK',
                         advice: `Soft ${total} patlama riski olmadan geliştirilebilir, kart çekin.`
                     };
                 }
@@ -133,8 +133,8 @@ const StrategyEngine = {
                     return {
                         action: 'surrender',
                         code: 'R',
-                        title: 'TESLİM OL (SURRENDER)',
-                        advice: `${total} vs Krupiye ${dealerUpCard.rank} için teslim olmak bahsin yarısını kurtarır.`
+                        title: 'PES ET',
+                        advice: `${total} vs Krupiye ${dealerUpCard.rank} için pes etmek bahsin yarısını kurtarır.`
                     };
                 } else {
                     action = action === 'Rh' ? 'H' : 'S';
@@ -150,21 +150,21 @@ const StrategyEngine = {
                 return {
                     action: 'double',
                     code: 'D',
-                    title: 'İKİYE KATLA (DOUBLE)',
+                    title: 'İKİYE KATLA',
                     advice: `${total} toplamı krupiyenin zayıf kartına karşı ikiye katlamak için en uygun durumdur.`
                 };
             } else if (action === 'S') {
                 return {
                     action: 'stand',
                     code: 'S',
-                    title: 'KAL (STAND)',
+                    title: 'DUR',
                     advice: `${total} toplamı ile patlama riski almayın, krupiyenin kartını bekleyin.`
                 };
             } else {
                 return {
                     action: 'hit',
                     code: 'H',
-                    title: 'KART ÇEK (HIT)',
+                    title: 'KART ÇEK',
                     advice: `${total} skoru kazanmak için yetersiz kalabilir, patlamadan kart çekmelisiniz.`
                 };
             }
@@ -173,8 +173,8 @@ const StrategyEngine = {
         return {
             action: total >= 17 ? 'stand' : 'hit',
             code: total >= 17 ? 'S' : 'H',
-            title: total >= 17 ? 'KAL (STAND)' : 'KART ÇEK (HIT)',
-            advice: total >= 17 ? '17 ve üzeri puanlarda kalmak önerilir.' : 'Kart çekerek puanınızı yükseltin.'
+            title: total >= 17 ? 'DUR' : 'KART ÇEK',
+            advice: total >= 17 ? '17 ve üzeri puanlarda durmak önerilir.' : 'Kart çekerek puanınızı yükseltin.'
         };
     }
 };
