@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DINAMO BLACKJACK - Çok Oyunculu VIP Casino</title>
+    <!-- Google Fonts for Luxury Casino Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Montserrat:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,700;1,600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-theme="classic-emerald">
+
+    <!-- ======================================================================
+         VIEW 1: CASINO LOBBY / MAIN MENU (Ana Menü & Masa Seçimi)
+         ====================================================================== -->
+    <div id="view-lobby" class="casino-view view-lobby">
+        
+        <!-- Lobby Top Navigation -->
+        <header class="lobby-header">
+            <div class="lobby-brand-box">
+                <div class="brand-stacked-logo">
+                    <span class="brand-dinamo">DINAMO</span>
+                    <span class="brand-blackjack">BLACKJACK</span>
+                </div>
+                <div class="brand-vip-badge">VIP LOBİ</div>
+            </div>
+
+            <!-- User Profile HUD in Lobby -->
+            <div class="lobby-user-hud">
+                <button id="btn-claim-bonus" class="btn-daily-bonus" title="Günlük Ücretsiz Çip Al">
+                    <span class="bonus-icon">🎁</span>
+                    <span class="bonus-text">GÜNLÜK BONUS</span>
+                </button>
+
+                <div id="lobby-profile-pill" class="profile-pill-card">
+                    <div id="lobby-user-avatar" class="avatar-bubble">👑</div>
+                    <div class="profile-info-col">
+                        <span id="lobby-username" class="profile-name">Giriş Yapılmadı</span>
+                        <span id="lobby-chips" class="profile-chips gold-text">$0</span>
+                    </div>
+                </div>
+
+                <button id="btn-open-leaderboard" class="btn-icon-pill" title="Liderlik Tablosu">
+                    <span class="icon">🏆</span>
+                    <span class="label">LİDERLER</span>
+                </button>
+
+                <button id="btn-lobby-settings" class="btn-icon-pill" title="Ayarlar">
+                    <span class="icon">⚙️</span>
+                </button>
+
+                <button id="btn-auth-trigger" class="btn-auth-login">
+                    <span>GİRİŞ YAP</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Lobby Hero Banner -->
+        <section class="lobby-hero-banner">
+            <div class="hero-content">
+                <h1 class="hero-title">CANLI VEGAS MASALARI</h1>
+                <p class="hero-sub">Gerçek oyuncularla masaya otur, stratejini konuştur ve Dinamo VIP liginde zirveye tırman!</p>
+            </div>
+        </section>
+
+        <!-- Tables Selection Grid -->
+        <main class="lobby-tables-container">
+            <div class="section-title-row">
+                <h2>Masa Seçimi</h2>
+                <span class="section-tag">CANLI ÇOK OYUNCULU SALONLAR</span>
+            </div>
+
+            <div class="tables-grid">
+                
+                <!-- Table 1: Rookie -->
+                <div class="table-card card-rookie" data-table="table-rookie">
+                    <div class="card-badge">BAŞLANGIÇ</div>
+                    <div class="card-icon">🍀</div>
+                    <h3 class="table-name">Acemi Salonu</h3>
+                    <div class="table-limits">Min: <strong>$5</strong> • Max: <strong>$2,000</strong></div>
+                    <div class="table-seat-meter">
+                        <span class="seat-label">Koltuklar:</span>
+                        <span class="seat-val" id="seats-table-rookie">0 / 3</span>
+                    </div>
+                    <button class="btn-join-table" data-table="table-rookie">MASAYA GİR</button>
+                </div>
+
+                <!-- Table 2: Vegas Strip -->
+                <div class="table-card card-vegas" data-table="table-vegas">
+                    <div class="card-badge vip-badge">POPÜLER</div>
+                    <div class="card-icon">🎰</div>
+                    <h3 class="table-name">Vegas Strip VIP</h3>
+                    <div class="table-limits">Min: <strong>$25</strong> • Max: <strong>$10,000</strong></div>
+                    <div class="table-seat-meter">
+                        <span class="seat-label">Koltuklar:</span>
+                        <span class="seat-val" id="seats-table-vegas">0 / 3</span>
+                    </div>
+                    <button class="btn-join-table" data-table="table-vegas">MASAYA GİR</button>
+                </div>
+
+                <!-- Table 3: Monte Carlo -->
+                <div class="table-card card-montecarlo" data-table="table-montecarlo">
+                    <div class="card-badge high-badge">HIGH ROLLER</div>
+                    <div class="card-icon">💎</div>
+                    <h3 class="table-name">Monte Carlo Salon</h3>
+                    <div class="table-limits">Min: <strong>$100</strong> • Max: <strong>$25,000</strong></div>
+                    <div class="table-seat-meter">
+                        <span class="seat-label">Koltuklar:</span>
+                        <span class="seat-val" id="seats-table-montecarlo">0 / 3</span>
+                    </div>
+                    <button class="btn-join-table" data-table="table-montecarlo">MASAYA GİR</button>
+                </div>
+
+                <!-- Table 4: Millionaire Club -->
+                <div class="table-card card-millionaire" data-table="table-millionaire">
+                    <div class="card-badge gold-badge">VIP ROYAL</div>
+                    <div class="card-icon">👑</div>
+                    <h3 class="table-name">Dinamo High Roller</h3>
+                    <div class="table-limits">Min: <strong>$500</strong> • Max: <strong>$100,000</strong></div>
+                    <div class="table-seat-meter">
+                        <span class="seat-label">Koltuklar:</span>
+                        <span class="seat-val" id="seats-table-millionaire">0 / 3</span>
+                    </div>
+                    <button class="btn-join-table" data-table="table-millionaire">MASAYA GİR</button>
+                </div>
+
+                <!-- Table 5: Solo Practice Mode -->
+                <div class="table-card card-solo" data-table="table-solo">
+                    <div class="card-badge solo-badge">ANTRENMAN</div>
+                    <div class="card-icon">⚡</div>
+                    <h3 class="table-name">Tek Kişilik Antrenman</h3>
+                    <div class="table-limits">Min: <strong>$5</strong> • Max: <strong>$100,000</strong></div>
+                    <div class="table-seat-meter">
+                        <span class="seat-label">Mod:</span>
+                        <span class="seat-val">Solo / Bot Krupiye</span>
+                    </div>
+                    <button class="btn-join-table btn-join-solo" data-table="table-solo">TEK OYNA</button>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- ======================================================================
+         VIEW 2: CASINO TABLE ROOM (Aktif Oyun Masası)
+         ====================================================================== -->
+    <div id="view-table" class="casino-view view-table hidden">
+        
+        <!-- Table Top Navigation Bar -->
+        <header class="casino-header">
+            <div class="header-left">
+                <!-- Back to Lobby Button -->
+                <button id="btn-back-lobby" class="btn-back-lobby" title="Lobiye Dön">
+                    <span class="arrow">⬅️</span>
+                    <span class="label">LOBİ</span>
+                </button>
+
+                <!-- Stacked Vertical Brand Name -->
+                <div class="brand-container">
+                    <div class="brand-stacked-logo">
+                        <span class="brand-dinamo">DINAMO</span>
+                        <span class="brand-blackjack">BLACKJACK</span>
+                    </div>
+                    <div id="active-table-badge" class="brand-vip-badge">VIP SALON</div>
+                </div>
+
+                <!-- Shoe / Deck Remaining Indicator -->
+                <div class="shoe-status-box" title="6 Destelik Deste Durumu">
+                    <div class="shoe-info-row">
+                        <span class="shoe-label">DESTE:</span>
+                        <span id="shoe-remaining" class="shoe-val">312 / 312 (100%)</span>
+                    </div>
+                    <div class="shoe-meter-track">
+                        <div id="shoe-meter-fill" class="shoe-meter-fill" style="width: 100%;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="header-center">
+                <!-- Financial HUD -->
+                <div class="hud-pill bankroll-pill">
+                    <div class="pill-label">KASA (BAKİYE)</div>
+                    <div id="bankroll-val" class="pill-value gold-glow">$5,000</div>
+                </div>
+
+                <div class="hud-pill bet-pill">
+                    <div class="pill-label">GÜNCEL BAHİS</div>
+                    <div id="current-bet-val" class="pill-value cyan-glow">$0</div>
+                </div>
+
+                <button id="btn-refill-bankroll" class="btn-refill hidden" title="Kasa tükendiğinde tıkla">
+                    + $2,500 AL
+                </button>
+            </div>
+
+            <div class="header-right">
+                <!-- In-game Chat Toggle -->
+                <button id="btn-toggle-chat" class="btn-icon-pill" title="Masa Sohbeti Aç/Kapat">
+                    <span class="icon">💬</span>
+                    <span class="label">SOHBET</span>
+                </button>
+
+                <!-- Strategy Coach Toggle -->
+                <button id="btn-toggle-coach" class="btn-icon-pill active" title="Matematiksel Strateji Koçu">
+                    <span class="icon">🧠</span>
+                    <span class="label">KOÇ MODU</span>
+                </button>
+
+                <button id="btn-open-strategy" class="btn-icon-pill" title="Vegas Strateji Tablosu">
+                    <span class="icon">📊</span>
+                    <span class="label">TABLO</span>
+                </button>
+
+                <button id="btn-open-rules" class="btn-icon-pill" title="Nasıl Oynanır & Kurallar">
+                    <span class="icon">📜</span>
+                </button>
+
+                <button id="btn-open-settings" class="btn-icon-pill" title="Ayarlar">
+                    <span class="icon">⚙️</span>
+                </button>
+
+                <!-- Sound Quick Toggle -->
+                <label class="sound-quick-switch" title="Ses Aç / Kapa">
+                    <input type="checkbox" id="sound-toggle" checked>
+                    <span class="sound-slider"></span>
+                </label>
+            </div>
+        </header>
+
+        <!-- Main Casino Table Playing Arena -->
+        <main class="table-outer-frame">
+            <div class="table-perspective-container">
+                <div class="table-cushion-border">
+                    <div class="table-felt">
+                        
+                        <!-- Felt Table Graphic Markings -->
+                        <div class="felt-markings">
+                            <div class="felt-rules-arc">
+                                <div class="felt-rule-line primary-gold">★ BLACKJACK 3'E 2 ÖDER ★</div>
+                                <div class="felt-rule-line secondary-silver">KRUPİYE 16'DA KART ÇEKER • 17'DE DURUR</div>
+                                <div class="felt-rule-line insurance-line">SİGORTA (INSURANCE) 2'YE 1 ÖDER</div>
+                            </div>
+
+                            <div class="felt-center-brand">
+                                <div class="felt-brand-dinamo">DINAMO</div>
+                                <div class="felt-brand-blackjack">BLACKJACK</div>
+                                <div class="felt-brand-sub">LAS VEGAS RULES • VIP SALON</div>
+                            </div>
+
+                            <div class="visual-discard-spot" title="Atık Kart Kutusu">
+                                <div class="discard-tray-box">
+                                    <div class="discard-cards-stack"></div>
+                                    <span class="shoe-text">ATIK KARTLAR</span>
+                                </div>
+                            </div>
+
+                            <div class="visual-shoe-spot" title="Deste Dağıtım Kutusu">
+                                <div class="shoe-visual-box">
+                                    <div class="shoe-cards-back"></div>
+                                    <span class="shoe-text">6 DESTE SHOE</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Dealer Play Area -->
+                        <section class="dealer-section">
+                            <div class="dealer-header-row">
+                                <div class="role-badge-box">
+                                    <span class="role-badge">KRUPİYE</span>
+                                </div>
+                                <div id="dealer-score-badge" class="score-badge hidden">0</div>
+                            </div>
+                            <div class="dealer-card-zone">
+                                <div id="dealer-cards" class="cards-holder dealer-cards-holder"></div>
+                            </div>
+                        </section>
+
+                        <!-- Multi-Seat Casino Arena (3 Real-Time Seats) -->
+                        <section class="multi-seat-arena">
+                            
+                            <!-- SEAT 0 (Sol Koltuk) -->
+                            <div id="seat-box-0" class="seat-container seat-left" data-seat="0">
+                                <div class="seat-hand-spot">
+                                    <div class="hand-score hidden">0</div>
+                                    <div class="seat-cards"></div>
+                                </div>
+                                <div class="seat-betting-spot">
+                                    <div class="seat-chip-stack"></div>
+                                    <span class="seat-bet-val">$0</span>
+                                </div>
+                                <div class="seat-user-tag hidden">
+                                    <span class="seat-avatar">👑</span>
+                                    <div class="seat-name-col">
+                                        <span class="seat-username">Oyuncu 1</span>
+                                        <span class="seat-chips">$0</span>
+                                    </div>
+                                </div>
+                                <button class="btn-take-seat" data-seat="0">
+                                    <span class="seat-icon">🪑</span>
+                                    <span>OTUR</span>
+                                </button>
+                            </div>
+
+                            <!-- SEAT 1 (Orta Koltuk - Ana Oyuncu Yuvası) -->
+                            <div id="seat-box-1" class="seat-container seat-center" data-seat="1">
+                                <div class="seat-hand-spot">
+                                    <div class="hand-score hidden">0</div>
+                                    <div class="seat-cards"></div>
+                                </div>
+                                <div class="seat-betting-spot">
+                                    <div class="seat-chip-stack"></div>
+                                    <span class="seat-bet-val">$0</span>
+                                </div>
+                                <div class="seat-user-tag hidden">
+                                    <span class="seat-avatar">👑</span>
+                                    <div class="seat-name-col">
+                                        <span class="seat-username">Oyuncu 2</span>
+                                        <span class="seat-chips">$0</span>
+                                    </div>
+                                </div>
+                                <button class="btn-take-seat" data-seat="1">
+                                    <span class="seat-icon">🪑</span>
+                                    <span>OTUR</span>
+                                </button>
+                            </div>
+
+                            <!-- SEAT 2 (Sağ Koltuk) -->
+                            <div id="seat-box-2" class="seat-container seat-right" data-seat="2">
+                                <div class="seat-hand-spot">
+                                    <div class="hand-score hidden">0</div>
+                                    <div class="seat-cards"></div>
+                                </div>
+                                <div class="seat-betting-spot">
+                                    <div class="seat-chip-stack"></div>
+                                    <span class="seat-bet-val">$0</span>
+                                </div>
+                                <div class="seat-user-tag hidden">
+                                    <span class="seat-avatar">👑</span>
+                                    <div class="seat-name-col">
+                                        <span class="seat-username">Oyuncu 3</span>
+                                        <span class="seat-chips">$0</span>
+                                    </div>
+                                </div>
+                                <button class="btn-take-seat" data-seat="2">
+                                    <span class="seat-icon">🪑</span>
+                                    <span>OTUR</span>
+                                </button>
+                            </div>
+
+                        </section>
+
+                        <!-- Solo Mode Center Spot (Active in Solo Practice) -->
+                        <section id="solo-center-spot" class="table-center-bet-spot hidden">
+                            <div id="betting-spot" class="betting-circle">
+                                <div class="betting-circle-rim"></div>
+                                <div class="betting-circle-inner">
+                                    <span class="circle-title">BAHİS ALANI</span>
+                                    <span class="circle-limits">Min $5 • Max $50K</span>
+                                </div>
+                                <div id="chip-stack-container" class="chip-stack-layer"></div>
+                            </div>
+                        </section>
+
+                        <!-- Solo Mode Player Section (Active in Solo Practice) -->
+                        <section id="solo-player-section" class="player-section hidden">
+                            <div id="player-cards-wrapper" class="player-hands-row">
+                                <div id="player-hand-0" class="player-hand-spot active-hand">
+                                    <div class="hand-score hidden">0</div>
+                                    <div class="hand-card-zone">
+                                        <div class="hand-cards"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- In-Game Live Table Chat Drawer -->
+        <aside id="table-chat-drawer" class="chat-drawer hidden">
+            <div class="chat-header">
+                <h3>💬 Masa Sohbeti</h3>
+                <button id="btn-close-chat" class="chat-close">&times;</button>
+            </div>
+            <div id="chat-messages-box" class="chat-messages-log">
+                <div class="chat-msg system">Masaya hoş geldiniz! Bol şanslar.</div>
+            </div>
+            <div class="chat-emojis-row">
+                <button class="btn-chat-emoji" data-emoji="🍀">🍀</button>
+                <button class="btn-chat-emoji" data-emoji="🔥">🔥</button>
+                <button class="btn-chat-emoji" data-emoji="👏">👏</button>
+                <button class="btn-chat-emoji" data-emoji="💰">💰</button>
+                <button class="btn-chat-emoji" data-emoji="🎉">🎉</button>
+            </div>
+            <div class="chat-input-row">
+                <input type="text" id="chat-input" placeholder="Mesajınızı yazın..." maxlength="80">
+                <button id="btn-send-chat" class="btn-send-msg">GÖNDER</button>
+            </div>
+        </aside>
+
+        <!-- Bottom Casino Console Control Dock (Ergonomic Cockpit) -->
+        <footer class="casino-console">
+            
+            <!-- Live Strategy Coach Hint Bar -->
+            <div id="coach-box" class="coach-live-box hidden">
+                <div class="coach-badge-col">
+                    <span class="coach-icon">⚡</span>
+                    <span class="coach-badge">STRATEJİ KOÇU:</span>
+                </div>
+                <div id="coach-rec" class="coach-rec-action">KART ÇEK (HIT)</div>
+                <div id="coach-advice" class="coach-body-text">
+                    Puanınız krupiyenin kartına göre avantajlıdır.
+                </div>
+            </div>
+
+            <!-- Multi-Turn Notice / Status Banner -->
+            <div id="multiplayer-status-bar" class="mp-status-bar hidden">
+                <span id="mp-status-msg" class="mp-status-text">Bahisler kapanıyor: 10s</span>
+            </div>
+
+            <!-- Action Buttons (Shown during Player Turn) -->
+            <div id="action-controls" class="action-dock hidden">
+                <button id="btn-hit" class="btn-action btn-action-hit">
+                    <span class="btn-action-hotkey">H</span>
+                    <span class="btn-action-title">KART ÇEK</span>
+                    <span class="btn-action-sub">HIT</span>
+                </button>
+
+                <button id="btn-stand" class="btn-action btn-action-stand">
+                    <span class="btn-action-hotkey">S</span>
+                    <span class="btn-action-title">KAL</span>
+                    <span class="btn-action-sub">STAND</span>
+                </button>
+
+                <button id="btn-double" class="btn-action btn-action-double">
+                    <span class="btn-action-hotkey">D</span>
+                    <span class="btn-action-title">İKİYE KATLA</span>
+                    <span class="btn-action-sub">DOUBLE</span>
+                </button>
+
+                <button id="btn-split" class="btn-action btn-action-split">
+                    <span class="btn-action-hotkey">P</span>
+                    <span class="btn-action-title">BÖL</span>
+                    <span class="btn-action-sub">SPLIT</span>
+                </button>
+
+                <button id="btn-surrender" class="btn-action btn-action-surrender">
+                    <span class="btn-action-hotkey">R</span>
+                    <span class="btn-action-title">TESLİM OL</span>
+                    <span class="btn-action-sub">SURRENDER</span>
+                </button>
+            </div>
+
+            <!-- Betting Console (Shown before Deal) -->
+            <div id="betting-controls" class="betting-console-dock">
+                
+                <div class="bet-utility-buttons">
+                    <button id="btn-clear" class="btn-util" title="Mevcut bahsi temizle (C)">
+                        <span class="util-icon">🗑️</span>
+                        <span>TEMİZLE</span>
+                    </button>
+                    <button id="btn-double-bet" class="btn-util" title="Bahsi 2 katına çıkar (D)">
+                        <span class="util-icon">✖️2</span>
+                        <span>2X BAHİS</span>
+                    </button>
+                    <button id="btn-rebet" class="btn-util" title="Önceki bahsi tekrar koy (R)">
+                        <span class="util-icon">🔄</span>
+                        <span>TEKRAR</span>
+                    </button>
+                    <button id="btn-all-in" class="btn-util btn-allin" title="Tüm bakiyeyi bas">
+                        <span class="util-icon">🔥</span>
+                        <span>ALL-IN</span>
+                    </button>
+                </div>
+
+                <!-- Centered Casino Chips Tray -->
+                <div class="chips-tray">
+                    <button class="chip chip-5" data-amount="5" title="$5 Çip">
+                        <span class="chip-rim"></span>
+                        <span class="chip-val">5</span>
+                    </button>
+                    <button class="chip chip-25" data-amount="25" title="$25 Çip">
+                        <span class="chip-rim"></span>
+                        <span class="chip-val">25</span>
+                    </button>
+                    <button class="chip chip-100" data-amount="100" title="$100 Çip">
+                        <span class="chip-rim"></span>
+                        <span class="chip-val">100</span>
+                    </button>
+                    <button class="chip chip-500" data-amount="500" title="$500 Çip">
+                        <span class="chip-rim"></span>
+                        <span class="chip-val">500</span>
+                    </button>
+                    <button class="chip chip-1000" data-amount="1000" title="$1,000 Çip">
+                        <span class="chip-rim"></span>
+                        <span class="chip-val">1K</span>
+                    </button>
+                    <button class="chip chip-5000" data-amount="5000" title="$5,000 Çip">
+                        <span class="chip-rim"></span>
+                        <span class="chip-val">5K</span>
+                    </button>
+                </div>
+
+                <!-- Big Golden DEAL Button (Active in Solo Mode) -->
+                <div class="deal-button-box">
+                    <button id="btn-deal" class="btn-deal-primary" disabled>
+                        <span class="deal-hotkey">BOŞLUK</span>
+                        <span class="deal-title">KARTLARI DAĞIT</span>
+                        <span class="deal-sub">DEAL</span>
+                    </button>
+                </div>
+
+            </div>
+        </footer>
+
+    </div>
+
+    <!-- ======================================================================
+         MODALS & OVERLAYS
+         ====================================================================== -->
+
+    <!-- Auth Modal (Giriş Yap & Kayıt Ol) -->
+    <div id="auth-modal" class="modal-overlay hidden">
+        <div class="modal-card auth-card">
+            <div class="modal-header">
+                <div class="auth-tabs">
+                    <button id="tab-btn-login" class="auth-tab active">GİRİŞ YAP</button>
+                    <button id="tab-btn-register" class="auth-tab">YENİ HESAP AÇ</button>
+                </div>
+                <button class="modal-close">&times;</button>
+            </div>
+
+            <!-- Login Form -->
+            <form id="form-login" class="auth-form">
+                <div class="form-group">
+                    <label>Kullanıcı Adı</label>
+                    <input type="text" id="login-username" required placeholder="Kullanıcı adınızı girin">
+                </div>
+                <div class="form-group">
+                    <label>Şifre</label>
+                    <input type="password" id="login-password" required placeholder="Şifrenizi girin">
+                </div>
+                <div id="login-error" class="form-error hidden"></div>
+                <button type="submit" class="btn-modal-primary btn-block">GİRİŞ YAP</button>
+            </form>
+
+            <!-- Register Form -->
+            <form id="form-register" class="auth-form hidden">
+                <div class="form-group">
+                    <label>Kullanıcı Adı (3-16 karakter)</label>
+                    <input type="text" id="reg-username" required placeholder="Havalı bir rumuz seçin">
+                </div>
+                <div class="form-group">
+                    <label>Şifre (en az 4 karakter)</label>
+                    <input type="password" id="reg-password" required placeholder="Güvenli bir şifre girin">
+                </div>
+                
+                <!-- Avatar Selection -->
+                <div class="form-group">
+                    <label>Profil Avatarı Seçin</label>
+                    <div class="avatar-selector">
+                        <label class="avatar-opt"><input type="radio" name="reg-avatar" value="avatar-vip-1" checked><span>👑</span></label>
+                        <label class="avatar-opt"><input type="radio" name="reg-avatar" value="avatar-vip-2"><span>🎩</span></label>
+                        <label class="avatar-opt"><input type="radio" name="reg-avatar" value="avatar-vip-3"><span>💎</span></label>
+                        <label class="avatar-opt"><input type="radio" name="reg-avatar" value="avatar-vip-4"><span>🦁</span></label>
+                        <label class="avatar-opt"><input type="radio" name="reg-avatar" value="avatar-vip-5"><span>⚡</span></label>
+                        <label class="avatar-opt"><input type="radio" name="reg-avatar" value="avatar-vip-6"><span>🃏</span></label>
+                    </div>
+                </div>
+
+                <div id="reg-error" class="form-error hidden"></div>
+                <button type="submit" class="btn-modal-primary btn-block">HESAP OLUŞTUR & BAŞLA</button>
+            </form>
+
+            <div class="auth-footer-divider">
+                <span>VEYA</span>
+            </div>
+
+            <button id="btn-guest-login" class="btn-guest-quick">
+                <span>👤 MİSAFİR OLARAK HIZLI OYNA</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- User Profile Modal -->
+    <div id="profile-modal" class="modal-overlay hidden">
+        <div class="modal-card profile-card">
+            <div class="modal-header">
+                <h3>OYUNCU PROFİLİ</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="profile-summary-header">
+                <div id="profile-big-avatar" class="profile-big-avatar">👑</div>
+                <div class="profile-title-col">
+                    <h2 id="profile-username-view">Oyuncu</h2>
+                    <span id="profile-vip-tag" class="vip-level-pill">VIP LOBİ SEVİYESİ 1</span>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <span class="stat-label">Kasa Bakiyesi</span>
+                    <span id="prof-chips" class="stat-number gold-text">$5,000</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">Toplam El</span>
+                    <span id="prof-hands" class="stat-number">0</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">Kazanılan El</span>
+                    <span id="prof-wins" class="stat-number green-text">0</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">Blackjack Sayısı</span>
+                    <span id="prof-bjs" class="stat-number gold-text">0</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">En Yüksek Kazanç</span>
+                    <span id="prof-biggest" class="stat-number green-text">$0</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">Kazanma Oranı</span>
+                    <span id="prof-winrate" class="stat-number">0%</span>
+                </div>
+            </div>
+
+            <div class="profile-modal-actions">
+                <button id="btn-logout" class="btn-modal-secondary">ÇIKIŞ YAP</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leaderboard Modal -->
+    <div id="leaderboard-modal" class="modal-overlay hidden">
+        <div class="modal-card modal-wide">
+            <div class="modal-header">
+                <h3>🏆 DİNAMO CASINO EN ZENGİNLER (TOP 10)</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-scroll-content">
+                <table class="leaderboard-table">
+                    <thead>
+                        <tr>
+                            <th>Sıra</th>
+                            <th>Oyuncu</th>
+                            <th>Kasa Çipleri</th>
+                            <th>Galibiyet</th>
+                            <th>En Büyük Kazanç</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-tbody">
+                        <tr><td colspan="5" style="text-align: center; padding: 20px;">Liderler yükleniyor...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Round Message Overlay Banner -->
+    <div id="round-message-banner" class="round-overlay hidden">
+        <div class="banner-card">
+            <h2 id="round-banner-title" class="banner-title gold">⚡ DINAMO BLACKJACK! ⚡</h2>
+            <p id="round-banner-sub" class="banner-sub">Tebrikler! Toplam kazanç: +$250</p>
+            <button id="btn-next-round" class="btn-next-hand">
+                <span>YENİ EL BAŞLAT</span>
+                <span class="hotkey-sub">[ BOŞLUK ]</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Insurance Prompt Modal -->
+    <div id="insurance-modal" class="modal-overlay hidden">
+        <div class="modal-card insurance-card">
+            <h3 class="modal-title">SİGORTA İSTER MİSİNİZ?</h3>
+            <p class="modal-desc">
+                Krupiyenin açık kartı <strong>AS</strong>. Krupiyenin Blackjack yapma ihtimaline karşı sigorta satın alabilirsiniz.
+            </p>
+            <div class="insurance-cost-tag">
+                Sigorta Bedeli: <span id="insurance-cost-text" class="gold-text">$50</span>
+            </div>
+            <div class="modal-actions-row">
+                <button id="btn-insurance-yes" class="btn-modal-primary">SİGORTA AL (EVET)</button>
+                <button id="btn-insurance-no" class="btn-modal-secondary">HAYIR, DEVAM ET</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Strategy Chart Modal -->
+    <div id="strategy-chart-modal" class="modal-overlay hidden">
+        <div class="modal-card modal-wide">
+            <div class="modal-header">
+                <h3>VEGAS TEMEL STRATEJİ TABLOSU (BASIC STRATEGY)</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-scroll-content">
+                <p class="strategy-intro">
+                    Bu tablo matematiksel olasılık teorisi ve bilgisayar simülasyonları ile kanıtlanmış, kasa avantajını %0.5'in altına düşüren en kusursuz Blackjack stratejisidir.
+                </p>
+                <div class="legend-bar">
+                    <span class="legend-item bg-hit">H: Kart Çek (Hit)</span>
+                    <span class="legend-item bg-stand">S: Kal (Stand)</span>
+                    <span class="legend-item bg-double">D: İkiye Katla (Double)</span>
+                    <span class="legend-item bg-split">P: Böl (Split)</span>
+                    <span class="legend-item bg-surrender">R: Teslim Ol (Surrender)</span>
+                </div>
+                <div class="strategy-table-wrapper">
+                    <h4>Sert Toplamlar (Hard Totals)</h4>
+                    <table class="strategy-grid">
+                        <thead><tr><th>El</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th><th>A</th></tr></thead>
+                        <tbody>
+                            <tr><td>17-20</td><td class="S">S</td><td class="S">S</td><td class="S">S</td><td class="S">S</td><td class="S">S</td><td class="S">S</td><td class="S">S</td><td class="S">S</td><td class="S">S</td><td class="S">S</td></tr>
+                            <tr><td>16</td><td class="S">S</td><td class="S">S</td><td class="S">S</td><td class="S">S</td><td class="S">S</td><td class="H">H</td><td class="H">H</td><td class="R">R</td><td class="R">R</td><td class="R">R</td></tr>
+                            <tr><td>15</td><td class="S">S</td><td class="S">S</td><td class="S">S</td><td class="S">S</td><td class="S">S</td><td class="H">H</td><td class="H">H</td><td class="H">H</td><td class="R">R</td><td class="H">H</td></tr>
+                            <tr><td>13-14</td><td class="S">S</td><td class="S">S</td><td class="S">S</td><td class="S">S</td><td class="S">S</td><td class="H">H</td><td class="H">H</td><td class="H">H</td><td class="H">H</td><td class="H">H</td></tr>
+                            <tr><td>12</td><td class="H">H</td><td class="H">H</td><td class="S">S</td><td class="S">S</td><td class="S">S</td><td class="H">H</td><td class="H">H</td><td class="H">H</td><td class="H">H</td><td class="H">H</td></tr>
+                            <tr><td>11</td><td class="D">D</td><td class="D">D</td><td class="D">D</td><td class="D">D</td><td class="D">D</td><td class="D">D</td><td class="D">D</td><td class="D">D</td><td class="D">D</td><td class="D">D</td></tr>
+                            <tr><td>10</td><td class="D">D</td><td class="D">D</td><td class="D">D</td><td class="D">D</td><td class="D">D</td><td class="D">D</td><td class="D">D</td><td class="D">D</td><td class="H">H</td><td class="H">H</td></tr>
+                            <tr><td>9</td><td class="H">H</td><td class="D">D</td><td class="D">D</td><td class="D">D</td><td class="D">D</td><td class="H">H</td><td class="H">H</td><td class="H">H</td><td class="H">H</td><td class="H">H</td></tr>
+                            <tr><td>5-8</td><td class="H">H</td><td class="H">H</td><td class="H">H</td><td class="H">H</td><td class="H">H</td><td class="H">H</td><td class="H">H</td><td class="H">H</td><td class="H">H</td><td class="H">H</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rules Modal -->
+    <div id="rules-modal" class="modal-overlay hidden">
+        <div class="modal-card modal-wide">
+            <div class="modal-header">
+                <h3>DINAMO BLACKJACK KURALLARI</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-scroll-content rules-body">
+                <h4>🎯 Temel Amaç</h4>
+                <p>21'i geçmeden krupiyeden daha yüksek bir el puanına ulaşmak veya krupiyenin 21'i geçip patlamasını sağlamaktır.</p>
+                <h4>💰 Ödeme Oranları</h4>
+                <ul>
+                    <li><strong>Doğal Blackjack:</strong> İlk 2 kartta As + 10/J/Q/K gelirse <strong>3'e 2</strong> öder.</li>
+                    <li><strong>Normal Galibiyet:</strong> 1'e 1 öder.</li>
+                    <li><strong>Beraberlik (Push):</strong> Bahis aynen iade edilir.</li>
+                    <li><strong>Sigorta:</strong> 2'ye 1 öder.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal-overlay hidden">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>AYARLAR & GÖRÜNÜM</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="settings-form">
+                <div class="setting-row">
+                    <label for="theme-select">Masa Çuha Teması:</label>
+                    <select id="theme-select" class="custom-select">
+                        <option value="classic-emerald">Klasik Zümrüt Yeşili (Emerald)</option>
+                        <option value="monte-carlo-blue">Monte Carlo Gece Mavisi</option>
+                        <option value="royal-burgundy">Kraliyet Bordo Kadife</option>
+                        <option value="cyber-dark">Dinamo VIP Karbon Siyah</option>
+                    </select>
+                </div>
+                <div class="setting-row">
+                    <label for="speed-select">Oyun / Dağıtım Hızı:</label>
+                    <select id="speed-select" class="custom-select">
+                        <option value="normal">Normal (Gerçekçi Casino Akışı)</option>
+                        <option value="fast">Hızlı (Seri Oyun)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/audio.js"></script>
+    <script src="js/deck.js"></script>
+    <script src="js/strategy.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/multiplayer.js"></script>
+    <script src="js/ui.js"></script>
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            const game = new BlackjackGame();
+            const ui = new BlackjackUI(game);
+            window.blackjackApp = { game, ui };
+        });
+    </script>
+</body>
+</html>
