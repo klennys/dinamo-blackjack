@@ -392,6 +392,27 @@ class BlackjackUI {
         });
 
         // Chat Toggle & Messaging
+        // Fullscreen / Rotate Toggle
+        const btnRotate = document.getElementById('btn-fullscreen-rotate');
+        if (btnRotate) {
+            btnRotate.addEventListener('click', () => {
+                if (!document.fullscreenElement) {
+                    const el = document.documentElement;
+                    const rfs = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
+                    if (rfs) {
+                        rfs.call(el).then(() => {
+                            if (screen.orientation && screen.orientation.lock) {
+                                screen.orientation.lock('landscape').catch(() => {});
+                            }
+                        }).catch(() => {});
+                    }
+                } else {
+                    const efs = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen;
+                    if (efs) efs.call(document).catch(() => {});
+                }
+            });
+        }
+
         this.btnToggleChat.addEventListener('click', () => {
             this.chatDrawer.classList.toggle('hidden');
         });

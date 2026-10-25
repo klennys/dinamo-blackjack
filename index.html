@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Montserrat:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,700;1,600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=3">
+    <link rel="stylesheet" href="css/style.css?v=4">
 </head>
 <body data-theme="classic-emerald">
 
@@ -433,6 +433,11 @@
             </div>
 
             <div class="header-right">
+                <!-- Fullscreen / Landscape Mobile Toggle -->
+                <button id="btn-fullscreen-rotate" class="btn-icon-pill btn-rotate-pill" title="Yatay / Tam Ekran Görünüm">
+                    <span class="icon">🔄</span>
+                    <span class="label">YATAY</span>
+                </button>
                 <!-- In-game Chat Toggle -->
                 <button id="btn-toggle-chat" class="btn-icon-pill" title="Masa Sohbeti Aç/Kapat">
                     <span class="icon">💬</span>
@@ -1182,9 +1187,9 @@
     <script src="js/deck.js?v=3"></script>
     <script src="js/strategy.js?v=3"></script>
     <script src="js/game.js?v=3"></script>
-    <script src="js/auth.js?v=3"></script>
+    <script src="js/auth.js?v=4"></script>
     <script src="js/multiplayer.js?v=3"></script>
-    <script src="js/ui.js?v=3"></script>
+    <script src="js/ui.js?v=4"></script>
     <script>
         window.addEventListener('DOMContentLoaded', () => {
             const game = new BlackjackGame();

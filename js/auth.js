@@ -99,12 +99,6 @@ class AuthManager {
             return { success: false, error: 'Şifre en az 4 karakter olmalıdır.' };
         }
 
-        // Check duplicate in local storage
-        const localAccounts = this.getLocalAccounts();
-        if (localAccounts[username.toLowerCase()]) {
-            return { success: false, error: 'Bu kullanıcı adı zaten alınmış!' };
-        }
-
         const fallbackUser = {
             id: Date.now(),
             username: username,
