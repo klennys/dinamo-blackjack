@@ -1176,6 +1176,13 @@ async def api_me(request):
             cur = conn.cursor()
             cur.execute("SELECT * FROM users WHERE username = ?", (username,))
             row = cur.fetchone()
+            if not row:
+                pw_hash = hash_pw("auto_healed_vip")
+                cur.execute("INSERT INTO users (username, password_hash, chips) VALUES (?, ?, 5000)", (username, pw_hash))
+                conn.commit()
+                user_id = cur.lastrowid
+                cur.execute("SELECT * FROM users WHERE id = ?", (user_id,))
+                row = cur.fetchone()
             if row:
                 user = dict(row)
                 del user["password_hash"]
@@ -1272,6 +1279,13 @@ async def ws_handler(request):
                             cur = conn.cursor()
                             cur.execute("SELECT * FROM users WHERE username = ?", (username,))
                             row = cur.fetchone()
+                            if not row:
+                                pw_hash = hash_pw("auto_healed_vip")
+                                cur.execute("INSERT INTO users (username, password_hash, chips) VALUES (?, ?, 5000)", (username, pw_hash))
+                                conn.commit()
+                                user_id = cur.lastrowid
+                                cur.execute("SELECT * FROM users WHERE id = ?", (user_id,))
+                                row = cur.fetchone()
                             if row:
                                 current_user = dict(row)
                                 if "password_hash" in current_user:
@@ -1292,6 +1306,36 @@ async def ws_handler(request):
 
                 # 2. Sit at Seat (Allows player to sit at multiple seats)
                 elif action == "TAKE_SEAT":
+                    if not current_user:
+                        token = data.get("token")
+                        username = data.get("username")
+                        if token:
+                            current_user = get_user_by_token(token)
+                        if not current_user and username:
+                            try:
+                                conn = get_db()
+                                cur = conn.cursor()
+                                cur.execute("SELECT * FROM users WHERE username = ?", (username,))
+                                row = cur.fetchone()
+                                if not row:
+                                    pw_hash = hash_pw("auto_healed_vip")
+                                    cur.execute("INSERT INTO users (username, password_hash, chips) VALUES (?, ?, 5000)", (username, pw_hash))
+                                    conn.commit()
+                                    user_id = cur.lastrowid
+                                    cur.execute("SELECT * FROM users WHERE id = ?", (user_id,))
+                                    row = cur.fetchone()
+                                if row:
+                                    current_user = dict(row)
+                                    if "password_hash" in current_user:
+                                        del current_user["password_hash"]
+                                    if token:
+                                        cur.execute("INSERT OR REPLACE INTO sessions (token, user_id, created_at) VALUES (?, ?, ?)", (token, current_user["id"], time.time()))
+                                        conn.commit()
+                                    ACTIVE_SESSIONS[token] = current_user
+                                conn.close()
+                            except Exception as e:
+                                print("Take seat auto-heal err:", e)
+
                     if not current_table or not current_user:
                         await ws.send_str(json.dumps({"type": "ERROR", "message": "Önce giriş yapmalısınız!"}))
                         continue

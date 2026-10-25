@@ -4382,102 +4382,89 @@ body {
     /* 2. Mobile Lobby Header */
     .lobby-header {
         padding: 8px 12px !important;
-        min-height: 50px !important;
+        min-height: 52px !important;
+        height: 52px !important;
         width: 100% !important;
         max-width: 100vw !important;
         box-sizing: border-box !important;
         display: flex !important;
         justify-content: space-between !important;
         align-items: center !important;
-        overflow: hidden !important;
+        background: rgba(8, 12, 20, 0.95) !important;
+        backdrop-filter: blur(16px) !important;
+        border-bottom: 1px solid rgba(245, 200, 66, 0.2) !important;
+        z-index: 25 !important;
     }
-    .lobby-brand-logo {
-        gap: 6px !important;
+    .lobby-brand-box {
+        display: flex !important;
+        align-items: center !important;
+        gap: 4px !important;
         flex-shrink: 0 !important;
     }
-    .brand-vip-badge {
+    .lobby-brand-box .brand-vip-badge {
         display: none !important;
     }
-    .brand-dinamo {
-        font-size: 14px !important;
+    .lobby-brand-box .brand-dinamo {
+        font-size: 13px !important;
         letter-spacing: 2px !important;
+        line-height: 1.1 !important;
     }
-    .brand-blackjack {
-        font-size: 15px !important;
+    .lobby-brand-box .brand-blackjack {
+        font-size: 14px !important;
         letter-spacing: 1px !important;
+        line-height: 1.1 !important;
     }
+
+    /* Mobile Header HUD (Compact, fits perfectly) */
     .lobby-user-hud {
-        gap: 6px !important;
-        flex-shrink: 1 !important;
+        gap: 5px !important;
+        flex-shrink: 0 !important;
         display: flex !important;
         align-items: center !important;
     }
     .btn-daily-bonus {
-        padding: 4px 8px !important;
-        font-size: 10px !important;
-        border-radius: 12px !important;
+        padding: 4px 7px !important;
+        font-size: 9.5px !important;
+        border-radius: 10px !important;
         white-space: nowrap !important;
     }
-    .profile-pill-card {
-        padding: 4px 8px !important;
-        border-radius: 12px !important;
-        gap: 4px !important;
+    .btn-daily-bonus .bonus-text {
+        font-size: 9.5px !important;
     }
-    .profile-name, .profile-chips-divider {
+    .profile-pill-card {
+        padding: 4px 7px !important;
+        border-radius: 10px !important;
+        gap: 3px !important;
+        background: rgba(15, 23, 42, 0.8) !important;
+        border: 1px solid rgba(56, 189, 248, 0.3) !important;
+    }
+    .profile-pill-card .profile-name,
+    .profile-pill-card .profile-chips-divider {
         display: none !important;
     }
-    .profile-chips {
-        font-size: 12px !important;
+    .profile-pill-card .profile-chips {
+        font-size: 11.5px !important;
         font-weight: 800 !important;
     }
     #btn-open-leaderboard {
-        padding: 4px 8px !important;
+        padding: 4px 7px !important;
         font-size: 12px !important;
+        border-radius: 10px !important;
     }
     #btn-open-leaderboard .label,
-    #btn-lobby-notifications,
-    #btn-auth-trigger {
+    #btn-lobby-notifications {
         display: none !important;
     }
+    .btn-auth-login {
+        display: inline-flex !important;
+        padding: 4px 8px !important;
+        font-size: 10px !important;
+        font-weight: 900 !important;
+        border-radius: 10px !important;
+    }
 
-    /* 3. Mobile Lobby Content */
+    /* 3. Mobile Lobby Content - Clean, Direct Table Navigation */
     .lobby-hero-banner {
-        padding: 16px 12px 12px !important;
-    }
-    .hero-spade-glow {
-        font-size: 36px !important;
-        margin-bottom: 4px !important;
-    }
-    .hero-brand .brand-dinamo {
-        font-size: 20px !important;
-        letter-spacing: 4px !important;
-    }
-    .hero-brand .brand-blackjack {
-        font-size: 22px !important;
-        letter-spacing: 2px !important;
-    }
-    .hero-slogan {
-        font-size: 10px !important;
-        letter-spacing: 1px !important;
-        margin-bottom: 12px !important;
-    }
-    .hero-btn-primary {
-        width: 100% !important;
-        max-width: 280px !important;
-        height: 44px !important;
-        font-size: 14px !important;
-        margin-bottom: 10px !important;
-    }
-    .hero-quick-actions {
-        gap: 6px !important;
-        flex-wrap: wrap !important;
-        justify-content: center !important;
-    }
-    .hero-action-pill {
-        padding: 5px 10px !important;
-        font-size: 10px !important;
-    }
-    .hero-action-desc {
         display: none !important;
     }
 

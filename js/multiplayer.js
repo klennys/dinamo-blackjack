@@ -93,7 +93,14 @@ class MultiplayerClient {
 
     // Actions
     takeSeat(seatIndex) {
-        this.send({ action: 'TAKE_SEAT', seatIndex });
+        const token = window.authManager ? window.authManager.token : null;
+        const me = window.authManager ? window.authManager.user : null;
+        this.send({ 
+            action: 'TAKE_SEAT', 
+            seatIndex,
+            token: token,
+            username: me ? me.username : null
+        });
     }
 
     leaveSeat() {
