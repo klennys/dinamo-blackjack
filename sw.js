@@ -1,5 +1,5 @@
 // Dinamo Blackjack PWA Service Worker
-const CACHE_NAME = 'dinamo-blackjack-v1';
+const CACHE_NAME = 'dinamo-blackjack-v2';
 
 self.addEventListener('install', (event) => {
     self.skipWaiting();

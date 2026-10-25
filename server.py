@@ -1580,6 +1580,9 @@ def create_app():
         return web.FileResponse(os.path.join(BASE_DIR, 'sw.js'), headers={'Content-Type': 'application/javascript'})
 
     async def favicon_handler(request):
+        ico_path = os.path.join(BASE_DIR, 'assets', 'favicon.ico')
+        if os.path.exists(ico_path):
+            return web.FileResponse(ico_path, headers={'Content-Type': 'image/x-icon'})
         return web.FileResponse(os.path.join(BASE_DIR, 'assets', 'icon-192.png'), headers={'Content-Type': 'image/png'})
 
     app.router.add_get('/', index)
