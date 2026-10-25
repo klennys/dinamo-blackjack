@@ -4145,7 +4145,7 @@ body {
 @media screen and (max-width: 1024px) {
     .lobby-header {
         padding: 10px 18px;
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
         gap: 10px;
     }
     .lobby-user-hud {
@@ -4259,6 +4259,7 @@ body {
 
     .lobby-header {
         padding: 8px 12px;
+        flex-wrap: nowrap;
     }
     .btn-daily-bonus .bonus-text {
         font-size: 10.5px;
@@ -4379,77 +4380,108 @@ body {
         overflow-x: hidden !important;
     }
 
-    /* 2. Mobile Lobby Header */
+    /* 2. Mobile Lobby Header - STRICT 1-ROW SIDE-BY-SIDE (NO WRAP) */
     .lobby-header {
-        padding: 8px 12px !important;
+        padding: 0 10px !important;
         min-height: 52px !important;
         height: 52px !important;
         width: 100% !important;
         max-width: 100vw !important;
         box-sizing: border-box !important;
         display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
         justify-content: space-between !important;
         align-items: center !important;
-        background: rgba(8, 12, 20, 0.95) !important;
+        background: rgba(8, 12, 20, 0.96) !important;
         backdrop-filter: blur(16px) !important;
-        border-bottom: 1px solid rgba(245, 200, 66, 0.2) !important;
+        border-bottom: 1px solid rgba(245, 200, 66, 0.22) !important;
         z-index: 25 !important;
+        overflow: hidden !important;
     }
     .lobby-brand-box {
         display: flex !important;
         align-items: center !important;
-        gap: 4px !important;
+        gap: 0 !important;
         flex-shrink: 0 !important;
     }
     .lobby-brand-box .brand-vip-badge {
         display: none !important;
     }
+    .lobby-brand-box .brand-stacked-logo {
+        display: flex !important;
+        flex-direction: column !important;
+        line-height: 1 !important;
+    }
     .lobby-brand-box .brand-dinamo {
-        font-size: 13px !important;
-        letter-spacing: 2px !important;
-        line-height: 1.1 !important;
+        font-size: 11px !important;
+        letter-spacing: 1.5px !important;
+        line-height: 1 !important;
     }
     .lobby-brand-box .brand-blackjack {
-        font-size: 14px !important;
-        letter-spacing: 1px !important;
+        font-size: 12px !important;
+        letter-spacing: 0.8px !important;
         line-height: 1.1 !important;
     }
 
-    /* Mobile Header HUD (Compact, fits perfectly) */
+    /* Mobile Header HUD - Aligned to the RIGHT of the Logo on the SAME Row */
     .lobby-user-hud {
-        gap: 5px !important;
+        gap: 4px !important;
         flex-shrink: 0 !important;
         display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
         align-items: center !important;
+        justify-content: flex-end !important;
     }
     .btn-daily-bonus {
-        padding: 4px 7px !important;
-        font-size: 9.5px !important;
-        border-radius: 10px !important;
+        padding: 4px 6px !important;
+        border-radius: 8px !important;
         white-space: nowrap !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 2px !important;
+        flex-shrink: 0 !important;
+    }
+    .bonus-word-daily {
+        display: none !important;
+    }
+    .btn-daily-bonus .bonus-icon {
+        font-size: 11px !important;
     }
     .btn-daily-bonus .bonus-text {
-        font-size: 9.5px !important;
+        font-size: 8.5px !important;
+        letter-spacing: 0.2px !important;
+        font-weight: 900 !important;
     }
     .profile-pill-card {
-        padding: 4px 7px !important;
-        border-radius: 10px !important;
+        padding: 4px 6px !important;
+        border-radius: 8px !important;
         gap: 3px !important;
-        background: rgba(15, 23, 42, 0.8) !important;
-        border: 1px solid rgba(56, 189, 248, 0.3) !important;
+        background: rgba(15, 23, 42, 0.85) !important;
+        border: 1px solid rgba(56, 189, 248, 0.35) !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        flex-shrink: 0 !important;
     }
     .profile-pill-card .profile-name,
     .profile-pill-card .profile-chips-divider {
         display: none !important;
     }
     .profile-pill-card .profile-chips {
-        font-size: 11.5px !important;
+        font-size: 11px !important;
         font-weight: 800 !important;
     }
     #btn-open-leaderboard {
-        padding: 4px 7px !important;
+        width: 28px !important;
+        height: 28px !important;
+        padding: 0 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
         font-size: 12px !important;
-        border-radius: 10px !important;
+        border-radius: 8px !important;
+        flex-shrink: 0 !important;
     }
     #btn-open-leaderboard .label,
     #btn-lobby-notifications {
@@ -4457,10 +4489,13 @@ body {
     }
     .btn-auth-login {
         display: inline-flex !important;
-        padding: 4px 8px !important;
-        font-size: 10px !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 4px 7px !important;
+        font-size: 9.5px !important;
         font-weight: 900 !important;
-        border-radius: 10px !important;
+        border-radius: 8px !important;
+        flex-shrink: 0 !important;
     }
 
     /* 3. Mobile Lobby Content - Clean, Direct Table Navigation */
@@ -4478,17 +4513,22 @@ body {
     .section-title-row {
         display: flex !important;
         justify-content: space-between !important;
-        align-items: baseline !important;
-        padding: 0 4px 8px !important;
+        align-items: center !important;
+        padding: 0 4px 6px !important;
+        margin-top: 6px !important;
         margin-bottom: 12px !important;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+        border-bottom: 1px solid rgba(245, 200, 66, 0.2) !important;
     }
     .section-title-row h2 {
-        font-size: 16px !important;
-        letter-spacing: 1.2px !important;
+        font-size: 15px !important;
+        letter-spacing: 0.8px !important;
+        margin: 0 !important;
     }
     .section-title-row .section-tag {
-        font-size: 9.5px !important;
+        font-size: 8.5px !important;
+        letter-spacing: 0.4px !important;
+        color: var(--gold-primary) !important;
+        margin: 0 !important;
     }
 
     .tables-grid {

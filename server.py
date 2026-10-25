@@ -1572,8 +1572,20 @@ def create_app():
     
     async def index(request):
         return web.FileResponse(os.path.join(BASE_DIR, 'index.html'))
-    
+
+    async def manifest_handler(request):
+        return web.FileResponse(os.path.join(BASE_DIR, 'manifest.json'), headers={'Content-Type': 'application/manifest+json'})
+
+    async def sw_handler(request):
+        return web.FileResponse(os.path.join(BASE_DIR, 'sw.js'), headers={'Content-Type': 'application/javascript'})
+
+    async def favicon_handler(request):
+        return web.FileResponse(os.path.join(BASE_DIR, 'assets', 'icon-192.png'), headers={'Content-Type': 'image/png'})
+
     app.router.add_get('/', index)
+    app.router.add_get('/manifest.json', manifest_handler)
+    app.router.add_get('/sw.js', sw_handler)
+    app.router.add_get('/favicon.ico', favicon_handler)
 
     return app
 

@@ -4,11 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>DINAMO BLACKJACK - Çok Oyunculu VIP Casino</title>
+    <!-- PWA & iOS Safari Desteği -->
+    <meta name="theme-color" content="#d4af37">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Dinamo BJ">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/icon-180.png">
+    <link rel="apple-touch-icon" sizes="192x192" href="/assets/icon-192.png">
+    <link rel="apple-touch-icon" sizes="512x512" href="/assets/icon-512.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/assets/icon-192.png">
+    <link rel="shortcut icon" href="/assets/icon-192.png">
     <!-- Google Fonts for Luxury Casino Typography -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Montserrat:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,700;1,600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=5">
+    <link rel="stylesheet" href="css/style.css?v=6">
 </head>
 <body data-theme="classic-emerald">
 
@@ -31,7 +43,7 @@
             <div class="lobby-user-hud">
                 <button id="btn-claim-bonus" class="btn-daily-bonus" title="Günlük $1,000 Ücretsiz Çip Al">
                     <span class="bonus-icon">🎁</span>
-                    <span class="bonus-text">GÜNLÜK $1K BONUS</span>
+                    <span class="bonus-text"><span class="bonus-word-daily">GÜNLÜK </span>$1K BONUS</span>
                 </button>
 
                 <div id="lobby-profile-pill" class="profile-pill-card">
@@ -41,6 +53,11 @@
                     <span id="lobby-chips" class="profile-chips">$0</span>
                     <span id="lobby-user-avatar" class="avatar-bubble hidden">👑</span>
                 </div>
+
+                <button id="btn-pwa-install" class="btn-icon-pill" title="Bilgisayara / Telefona Uygulama Olarak İndir" onclick="installDinamoApp()">
+                    <span class="icon">📲</span>
+                    <span class="label">UYGULAMAYI İNDİR</span>
+                </button>
 
                 <button id="btn-open-leaderboard" class="btn-icon-pill" title="Liderlik Tablosu">
                     <span class="icon">🏆</span>
@@ -1212,6 +1229,35 @@
                 ui.joinTable(tbl);
             }
         });
+    </script>
+    <!-- PWA Service Worker & Install Prompt -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW reg fail:', err));
+            });
+        }
+        
+        let deferredPwaPrompt = null;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPwaPrompt = e;
+            const pwaBtn = document.getElementById('btn-pwa-install');
+            if (pwaBtn) pwaBtn.classList.remove('hidden');
+        });
+
+        window.installDinamoApp = async function() {
+            if (deferredPwaPrompt) {
+                deferredPwaPrompt.prompt();
+                const { outcome } = await deferredPwaPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    console.log('User installed the PWA');
+                }
+                deferredPwaPrompt = null;
+            } else {
+                alert('Tarayıcınızın adres çubuğunun sağındaki "Yükle / İndir" simgesine tıklayarak veya Safari Paylaş menüsünden "Ana Ekrana Ekle" diyerek uygulamayı anında yükleyebilirsiniz!');
+            }
+        };
     </script>
 </body>
 </html>
