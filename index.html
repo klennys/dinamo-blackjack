@@ -11,11 +11,11 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Dinamo BJ">
     <link rel="manifest" href="/manifest.json">
-    <link rel="apple-touch-icon" sizes="180x180" href="/assets/icon-180.png">
-    <link rel="apple-touch-icon" sizes="192x192" href="/assets/icon-192.png">
-    <link rel="apple-touch-icon" sizes="512x512" href="/assets/icon-512.png">
-    <link rel="icon" type="image/png" sizes="192x192" href="/assets/icon-192.png">
-    <link rel="shortcut icon" href="/assets/icon-192.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/icon-180.png?v=7">
+    <link rel="apple-touch-icon" sizes="192x192" href="/assets/icon-192.png?v=7">
+    <link rel="apple-touch-icon" sizes="512x512" href="/assets/icon-512.png?v=7">
+    <link rel="icon" type="image/png" sizes="192x192" href="/assets/icon-192.png?v=7">
+    <link rel="shortcut icon" href="/assets/icon-192.png?v=7">
     <!-- Google Fonts for Luxury Casino Typography -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -53,11 +53,6 @@
                     <span id="lobby-chips" class="profile-chips">$0</span>
                     <span id="lobby-user-avatar" class="avatar-bubble hidden">👑</span>
                 </div>
-
-                <button id="btn-pwa-install" class="btn-icon-pill" title="Bilgisayara / Telefona Uygulama Olarak İndir" onclick="installDinamoApp()">
-                    <span class="icon">📲</span>
-                    <span class="label">UYGULAMAYI İNDİR</span>
-                </button>
 
                 <button id="btn-open-leaderboard" class="btn-icon-pill" title="Liderlik Tablosu">
                     <span class="icon">🏆</span>
@@ -1230,34 +1225,13 @@
             }
         });
     </script>
-    <!-- PWA Service Worker & Install Prompt -->
+    <!-- PWA Service Worker -->
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW reg fail:', err));
             });
         }
-        
-        let deferredPwaPrompt = null;
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPwaPrompt = e;
-            const pwaBtn = document.getElementById('btn-pwa-install');
-            if (pwaBtn) pwaBtn.classList.remove('hidden');
-        });
-
-        window.installDinamoApp = async function() {
-            if (deferredPwaPrompt) {
-                deferredPwaPrompt.prompt();
-                const { outcome } = await deferredPwaPrompt.userChoice;
-                if (outcome === 'accepted') {
-                    console.log('User installed the PWA');
-                }
-                deferredPwaPrompt = null;
-            } else {
-                alert('Tarayıcınızın adres çubuğunun sağındaki "Yükle / İndir" simgesine tıklayarak veya Safari Paylaş menüsünden "Ana Ekrana Ekle" diyerek uygulamayı anında yükleyebilirsiniz!');
-            }
-        };
     </script>
 </body>
 </html>
