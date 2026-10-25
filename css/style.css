@@ -1030,7 +1030,8 @@ body {
 
 .classic-casino-card {
     padding: 0 !important;
-    background: transparent !important;
+    background: #ffffff !important;
+    border: 1px solid rgba(0, 0, 0, 0.15) !important;
 }
 
 .card-svg-face {
@@ -1041,6 +1042,16 @@ body {
     pointer-events: none;
     user-select: none;
     border-radius: inherit;
+    position: relative;
+    z-index: 2;
+}
+
+.card-corner-top {
+    position: absolute;
+    top: 4px;
+    left: 6px;
+    z-index: 1;
+    pointer-events: none;
 }
 
 .sr-only {

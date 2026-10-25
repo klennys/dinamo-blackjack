@@ -942,10 +942,12 @@ class BlackjackUI {
                         }
                         const badge = seatBox.querySelector('.hand-score');
                         if (badge && data.calc) {
+                            badge.classList.remove('win', 'lose', 'push', 'surrender', 'busted', 'blackjack');
                             badge.innerText = data.calc.isBlackjack ? 'BLACKJACK!' :
                                              data.calc.isBust ? `PATLADI (${data.calc.total})` : `${data.calc.total}`;
                             badge.classList.remove('hidden');
                             if (data.calc.isBust) badge.classList.add('busted');
+                            else if (data.calc.isBlackjack) badge.classList.add('blackjack');
                         }
                     }
                 }
@@ -1181,16 +1183,38 @@ class BlackjackUI {
                 } else {
                     const spWrap = seatBox.querySelector('.split-hands-wrapper');
                     if (spWrap) spWrap.remove();
-                    cardsBox.innerHTML = '';
+
                     if (seat.cards && seat.cards.length) {
-                        seat.cards.forEach(c => cardsBox.appendChild(this.createCardDOM(c, false)));
-                        if (seat.calc) {
-                            badge.innerText = seat.calc.isBlackjack ? 'BLACKJACK!' :
-                                             seat.calc.isBust ? `PATLADI (${seat.calc.total})` : `${seat.calc.total}`;
-                            badge.classList.remove('hidden');
+                        const domCards = cardsBox.querySelectorAll('.card');
+                        let cardsMatch = (domCards.length === seat.cards.length);
+                        if (cardsMatch) {
+                            domCards.forEach((cEl, cIdx) => {
+                                const sc = seat.cards[cIdx];
+                                const rCode = String(sc.rank).toUpperCase();
+                                if (cEl.dataset.rank !== rCode) cardsMatch = false;
+                            });
+                        }
+                        if (!cardsMatch) {
+                            cardsBox.innerHTML = '';
+                            seat.cards.forEach(c => cardsBox.appendChild(this.createCardDOM(c, false)));
+                        }
+
+                        if (badge) {
+                            badge.classList.remove('win', 'lose', 'push', 'surrender', 'busted', 'blackjack');
+                            if (seat.calc) {
+                                badge.innerText = seat.calc.isBlackjack ? 'BLACKJACK!' :
+                                                 seat.calc.isBust ? `PATLADI (${seat.calc.total})` : `${seat.calc.total}`;
+                                badge.classList.remove('hidden');
+                                if (seat.calc.isBust) badge.classList.add('busted');
+                                else if (seat.calc.isBlackjack) badge.classList.add('blackjack');
+                            }
                         }
                     } else {
-                        badge.classList.add('hidden');
+                        cardsBox.innerHTML = '';
+                        if (badge) {
+                            badge.className = 'hand-score hidden';
+                            badge.innerText = '0';
+                        }
                     }
                 }
             } else {
@@ -1199,7 +1223,10 @@ class BlackjackUI {
                 const spWrap = seatBox.querySelector('.split-hands-wrapper');
                 if (spWrap) spWrap.remove();
                 cardsBox.innerHTML = '';
-                badge.classList.add('hidden');
+                if (badge) {
+                    badge.className = 'hand-score hidden';
+                    badge.innerText = '0';
+                }
                 betValEl.innerText = '$0';
                 seatBox.querySelector('.seat-chip-stack').innerHTML = '';
             }
@@ -1480,10 +1507,13 @@ class BlackjackUI {
                 cardsBox.appendChild(cardEl);
                 this.flyCardFromShoe(cardEl);
                 const badge = seatBox.querySelector('.hand-score');
-                if (data.calc) {
+                if (badge && data.calc) {
+                    badge.classList.remove('win', 'lose', 'push', 'surrender', 'busted', 'blackjack');
                     badge.innerText = data.calc.isBlackjack ? 'BLACKJACK!' :
                                      data.calc.isBust ? `PATLADI (${data.calc.total})` : `${data.calc.total}`;
                     badge.classList.remove('hidden');
+                    if (data.calc.isBust) badge.classList.add('busted');
+                    else if (data.calc.isBlackjack) badge.classList.add('blackjack');
                 }
             }
         }
@@ -1756,7 +1786,6 @@ class BlackjackUI {
             this.roundMessageBanner.classList.add('hidden');
         }
         if (this.activeMode === 'multiplayer') {
-            this.clearMultiplayerTableCards();
             window.multiplayerClient.nextRound();
         } else if (this.activeMode === 'solo') {
             this.soloGame.prepareNextRound();
@@ -1907,9 +1936,12 @@ class BlackjackUI {
             handBox.appendChild(this.createCardDOM(card, false));
             const badge = document.querySelector('#player-hand-0 .hand-score');
             if (badge && calculation) {
+                badge.classList.remove('win', 'lose', 'push', 'surrender', 'busted', 'blackjack');
                 badge.innerText = calculation.isBlackjack ? 'BLACKJACK!' :
                                  calculation.isBust ? `PATLADI (${calculation.total})` : `${calculation.total}`;
                 badge.classList.remove('hidden');
+                if (calculation.isBust) badge.classList.add('busted');
+                else if (calculation.isBlackjack) badge.classList.add('blackjack');
             }
         }
     }
@@ -2101,7 +2133,10 @@ class BlackjackUI {
         const cards = document.querySelector('#player-hand-0 .hand-cards');
         if (cards) cards.innerHTML = '';
         const badge = document.querySelector('#player-hand-0 .hand-score');
-        if (badge) badge.classList.add('hidden');
+        if (badge) {
+            badge.className = 'hand-score hidden';
+            badge.innerText = '0';
+        }
     }
 
     renderChipsOnBetSpot() {
@@ -2215,7 +2250,7 @@ class BlackjackUI {
         cardDiv.innerHTML = `
             <div class="card-inner">
                 <div class="card-front classic-casino-card">
-                    <span class="card-corner sr-only"><span class="rank">${rCode}</span><span class="suit">${suitSym}</span></span>
+                    <span class="card-corner card-corner-top"><span class="rank">${rCode}</span><span class="suit">${suitSym}</span></span>
                     <img src="${svgPath}" alt="${rCode} of ${card.suit || sCode}" class="card-svg-face" loading="eager" draggable="false">
                 </div>
             </div>

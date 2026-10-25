@@ -193,6 +193,11 @@ class MultiplayerTable:
         self.payout_skip_event = None
 
     def skip_payout(self):
+        # In multiplayer, ensure at least 2.5s showcase so other players have time to see their cards
+        elapsed = time.time() - getattr(self, 'payout_start_time', 0)
+        active_seats = [s for s in self.seats if s is not None and s.get('bet', 0) > 0]
+        if len(active_seats) > 1 and elapsed < 2.5:
+            return
         if self.payout_skip_event and not self.payout_skip_event.is_set():
             self.payout_skip_event.set()
 
@@ -1045,6 +1050,7 @@ class MultiplayerTable:
         })
 
         # Allow instant skip via "Tekrar Oyna" or max 4.5 seconds showcase
+        self.payout_start_time = time.time()
         self.payout_skip_event = asyncio.Event()
         try:
             await asyncio.wait_for(self.payout_skip_event.wait(), timeout=4.5)
